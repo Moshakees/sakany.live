@@ -119,6 +119,9 @@ create policy "Admins and Brokers can update booking requests" on public.booking
     )
   );
 
+create policy "Students can update/cancel their own booking requests" on public.booking_requests
+  for update using (auth.uid() = student_id);
+
 -- Create reports table for suspicious listings
 create table public.reports (
   id uuid default gen_random_uuid() primary key,
