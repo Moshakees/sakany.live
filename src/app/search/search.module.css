@@ -1,0 +1,682 @@
+.searchPage {
+  padding-top: 40px;
+  padding-bottom: 80px;
+}
+
+.header {
+  margin-bottom: 30px;
+}
+
+.searchBarContainer {
+  display: flex;
+  gap: 12px;
+  max-width: 800px;
+  margin: 0 auto 20px auto;
+  width: 100%;
+}
+
+.searchField {
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.searchIcon {
+  position: absolute;
+  right: 16px;
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 14px 48px 14px 16px;
+  font-size: 1.05rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background-color: var(--surface);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition);
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.15);
+}
+
+.searchBtn {
+  padding: 0 28px;
+  font-size: 1rem;
+  height: 52px;
+}
+
+.mainLayout {
+  display: flex;
+  gap: 30px;
+  position: relative;
+  align-items: flex-start;
+}
+
+/* Sidebar Styling - Desktop */
+.sidebar {
+  flex: 0 0 320px;
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 24px;
+  box-shadow: var(--shadow-sm);
+  position: sticky;
+  top: 90px;
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  scrollbar-width: thin;
+}
+
+.sidebarMobile {
+  display: none;
+}
+
+.sidebarTitle {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 12px;
+}
+
+.clearFiltersBtn {
+  font-size: 0.85rem;
+  color: var(--primary);
+  font-weight: 600;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.clearFiltersBtn:hover {
+  color: var(--primary-hover);
+  text-decoration: underline;
+}
+
+.filterGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.filterLabel {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.filterSelect {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background-color: var(--background);
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.filterSelect:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.priceRangeInputs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.priceInput {
+  width: 100%;
+  padding: 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background-color: var(--background);
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.priceInput:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.priceDivider {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.amenityCheckboxes {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  user-select: none;
+}
+
+.checkbox {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--primary);
+  cursor: pointer;
+}
+
+/* Results Content Area */
+.resultsContainer {
+  flex: 1;
+}
+
+.resultsHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  padding: 12px 20px;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+
+.resultsCount {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+.resultsCountHighlight {
+  color: var(--primary);
+  font-weight: 800;
+  font-size: 1.05rem;
+}
+
+.sortContainer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sortLabel {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.sortSelect {
+  padding: 6px 12px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background-color: var(--background);
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.sortSelect:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+/* Property Grid */
+.resultsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+/* Cards (Matches page.module.css style) */
+.card {
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-lg);
+  border-color: rgba(5, 150, 105, 0.2);
+}
+
+.imageContainer {
+  height: 180px;
+  position: relative;
+  background-color: #e2e8f0;
+}
+
+.image {
+  object-fit: cover;
+  width: 100%;
+  height: 100%;
+  transition: var(--transition);
+}
+
+.card:hover .image {
+  transform: scale(1.05);
+}
+
+.verifiedBadge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 10;
+  box-shadow: var(--shadow-md);
+  font-size: 0.75rem;
+  padding: 2px 8px;
+}
+
+.rentTypeBadge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 10;
+  box-shadow: var(--shadow-md);
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  background-color: rgba(15, 23, 42, 0.85);
+  color: #fff;
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.genderBadge {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  z-index: 10;
+  box-shadow: var(--shadow-md);
+  font-size: 0.75rem;
+  padding: 2px 8px;
+  font-weight: 700;
+}
+
+.genderMale {
+  background-color: #eff6ff;
+  color: #2563eb;
+  border: 1px solid rgba(37, 99, 235, 0.2);
+}
+
+.genderFemale {
+  background-color: #fdf2f8;
+  color: #db2777;
+  border: 1px solid rgba(219, 39, 119, 0.2);
+}
+
+.genderAny {
+  background-color: #f8fafc;
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+}
+
+.cardBody {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.cardLocation {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 6px;
+}
+
+.cardTitle {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 10px;
+  line-height: 1.4;
+  height: 44px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.specs {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 10px;
+}
+
+.specItem {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.amenityBadges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 12px;
+}
+
+.amenityMiniBadge {
+  font-size: 0.7rem;
+  padding: 2px 6px;
+  background-color: var(--background);
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.priceWrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+}
+
+.priceText {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.priceUnit {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  font-weight: 400;
+}
+
+.detailBtn {
+  background-color: var(--background);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  transition: var(--transition);
+}
+
+.detailBtn:hover {
+  background-color: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+/* Empty State */
+.emptyState {
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 60px 40px;
+  text-align: center;
+  box-shadow: var(--shadow-sm);
+  color: var(--text-secondary);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.emptyStateTitle {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.emptyStateDesc {
+  font-size: 0.95rem;
+  max-width: 400px;
+}
+
+.emptyStateBtn {
+  margin-top: 10px;
+}
+
+/* Mobile Toggles */
+.mobileFilterToggle {
+  display: none;
+}
+
+.mobileFilterHeader {
+  display: none;
+}
+
+/* Media Queries */
+@media (max-width: 991px) {
+  .sidebar {
+    flex: 0 0 280px;
+  }
+}
+
+@media (max-width: 768px) {
+  .mainLayout {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  /* Sticky floating action button for filters on mobile */
+  .mobileFilterToggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 90;
+    box-shadow: 0 10px 25px -5px rgba(5, 150, 105, 0.4);
+    padding: 12px 24px;
+    border-radius: 9999px;
+  }
+
+  /* Overlay for modal drawer */
+  .filterOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: 200;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+
+  .filterOverlayActive {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .sidebar {
+    display: none;
+  }
+
+  /* Sidebar drawer behavior on mobile */
+  .sidebarMobile {
+    position: fixed;
+    top: auto;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 210;
+    width: 100%;
+    max-height: 85vh;
+    border-top-left-radius: var(--radius-lg);
+    border-top-right-radius: var(--radius-lg);
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    box-shadow: 0 -10px 25px rgba(0, 0, 0, 0.15);
+    transform: translateY(100%);
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    background-color: var(--surface);
+    padding: 24px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .sidebarMobileActive {
+    transform: translateY(0);
+  }
+
+  .mobileFilterHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 12px;
+  }
+
+  .mobileFilterTitle {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--text-primary);
+  }
+
+  .mobileFilterClose {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .sidebarTitle {
+    display: none; /* Hide desktop sidebar title on mobile drawer */
+  }
+
+  .searchBarContainer {
+    flex-direction: column;
+    gap: 8px;
+    padding: 0 16px;
+  }
+
+  .searchBtn {
+    width: 100%;
+  }
+
+  .resultsHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px 16px;
+  }
+  
+  .sortContainer {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .resultsGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    padding: 0 16px;
+  }
+}
+
+@media (max-width: 600px) {
+  .resultsGrid {
+    gap: 8px !important;
+    padding: 0 8px !important;
+  }
+
+  .imageContainer {
+    height: 110px !important;
+  }
+
+  .cardBody {
+    padding: 10px !important;
+  }
+
+  .cardLocation {
+    font-size: 0.7rem !important;
+  }
+
+  .cardTitle {
+    font-size: 0.82rem !important;
+    line-height: 1.3 !important;
+    height: 32px !important;
+    margin-bottom: 6px !important;
+  }
+
+  .specs {
+    gap: 8px !important;
+    font-size: 0.7rem !important;
+    margin-bottom: 8px !important;
+    padding-bottom: 6px !important;
+  }
+
+  .amenityBadges {
+    display: none !important;
+  }
+
+  .priceWrapper {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 6px !important;
+  }
+
+  .priceText {
+    font-size: 0.95rem !important;
+  }
+
+  .priceUnit {
+    font-size: 0.65rem !important;
+  }
+
+  .detailBtn {
+    width: 100% !important;
+    text-align: center !important;
+    padding: 5px !important;
+    font-size: 0.75rem !important;
+  }
+}

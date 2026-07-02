@@ -1,0 +1,590 @@
+.container {
+  padding: 40px 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Show widget inline on mobile, hidden in sidebar */
+.mobileWidget {
+  display: none;
+}
+
+.desktopWidget {
+  display: block;
+}
+
+@media (max-width: 900px) {
+  .mobileWidget {
+    display: block;
+  }
+  .desktopWidget {
+    display: none;
+  }
+}
+
+
+.backBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-secondary);
+  font-weight: 700;
+  margin-bottom: 24px;
+  font-size: 0.95rem;
+  transition: var(--transition);
+}
+
+.backBtn:hover {
+  color: var(--primary);
+  transform: translateX(5px);
+}
+
+/* Two-column layout */
+.layout {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 40px;
+}
+
+@media (max-width: 900px) {
+  .layout {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+}
+
+.mainContent {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+/* Image Gallery */
+.gallery {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.mainImageWrapper {
+  height: 450px;
+  position: relative;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-md);
+  background-color: #e2e8f0;
+}
+
+@media (max-width: 600px) {
+  .mainImageWrapper {
+    height: 280px;
+    border-radius: var(--radius-md);
+  }
+}
+
+.mainImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.thumbnails {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+}
+
+.thumbnail {
+  width: 100px;
+  height: 75px;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: var(--transition);
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+
+.thumbnail:hover {
+  opacity: 1;
+}
+
+.thumbnailActive {
+  border-color: var(--primary);
+  opacity: 1;
+}
+
+.thumbnailImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Details Section */
+.headerSection {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 24px;
+}
+
+.badges {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.title {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1.4;
+}
+
+@media (max-width: 600px) {
+  .title {
+    font-size: 1.5rem;
+  }
+}
+
+.price {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: var(--primary);
+}
+
+.priceUnit {
+  font-size: 1rem;
+  font-weight: 400;
+  color: var(--text-secondary);
+}
+
+.metaInfo {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  padding: 16px 24px;
+  border-radius: var(--radius-md);
+}
+
+.metaItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.metaIcon {
+  color: var(--primary);
+}
+
+.descriptionWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sectionTitle {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.description {
+  font-size: 1.05rem;
+  line-height: 1.8;
+  color: var(--text-secondary);
+  white-space: pre-line;
+}
+
+/* Sidebar Contact Panel */
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.contactCard {
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 30px;
+  box-shadow: var(--shadow-lg);
+  position: sticky;
+  top: 100px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.landlordInfo {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 16px;
+}
+
+.avatar {
+  width: 54px;
+  height: 54px;
+  background-color: var(--primary-light);
+  color: var(--primary);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 1.2rem;
+}
+
+.avatarDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.landlordName {
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.landlordRole {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.warningBox {
+  background-color: rgba(239, 68, 68, 0.05);
+  border: 1px dashed rgba(239, 68, 68, 0.3);
+  padding: 16px;
+  border-radius: var(--radius-md);
+  color: var(--danger);
+  font-size: 0.85rem;
+  line-height: 1.6;
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.whatsappBtn {
+  background-color: #25d366;
+  color: white;
+  width: 100%;
+  font-size: 1rem;
+}
+
+.whatsappBtn:hover {
+  background-color: #20ba5a;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
+}
+
+.callBtn {
+  background-color: var(--primary);
+  color: white;
+  width: 100%;
+  font-size: 1rem;
+}
+
+.callBtn:hover {
+  background-color: var(--primary-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
+}
+
+/* Image Toolbar */
+.imageToolbar {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  display: flex;
+  gap: 8px;
+  z-index: 10;
+  direction: rtl;
+}
+
+.toolbarBtn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-sm);
+}
+
+.toolbarBtn:hover {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: white;
+  transform: scale(1.1);
+}
+
+/* Lightbox */
+.lightbox {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(12px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  animation: fadeIn 0.3s forwards;
+  direction: rtl;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.lightboxContent {
+  position: relative;
+  width: 90%;
+  max-width: 900px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.lightboxImage {
+  max-width: 100%;
+  max-height: 80vh;
+  border-radius: var(--radius-lg);
+  object-fit: contain;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.lightboxClose {
+  position: absolute;
+  top: -50px;
+  left: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.lightboxClose:hover {
+  background: #ef4444;
+  border-color: #ef4444;
+}
+
+.lightboxArrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10000;
+  transition: all 0.2s;
+}
+
+.lightboxArrow:hover {
+  background: var(--primary);
+  border-color: var(--primary);
+}
+
+.lightboxArrowLeft {
+  left: -60px;
+}
+
+.lightboxArrowRight {
+  right: -60px;
+}
+
+@media (max-width: 1024px) {
+  .lightboxArrowLeft {
+    left: 10px;
+    background: rgba(15, 23, 42, 0.6);
+  }
+  .lightboxArrowRight {
+    right: 10px;
+    background: rgba(15, 23, 42, 0.6);
+  }
+  .lightboxClose {
+    left: auto;
+    right: 10px;
+    top: -50px;
+  }
+}
+
+.lightboxCaption {
+  margin-top: 16px;
+  color: #94a3b8;
+  font-weight: 700;
+  font-size: 1rem;
+  text-align: center;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 6px 16px;
+  border-radius: 20px;
+}
+
+/* Modals / Download Dialog */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(8px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.2s forwards;
+  direction: rtl;
+}
+
+.modalContent {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: var(--shadow-2xl);
+  text-align: center;
+  animation: scaleIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.modalTitle {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.modalDesc {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin-bottom: 20px;
+  line-height: 1.6;
+}
+
+.modalActions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.btnPrimary {
+  background: var(--primary);
+  color: white;
+  border: none;
+  padding: 11px 16px;
+  border-radius: var(--radius-md);
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.95rem;
+}
+
+.btnPrimary:hover {
+  background: var(--primary-hover);
+}
+
+.btnSecondary {
+  background: var(--surface);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+  padding: 11px 16px;
+  border-radius: var(--radius-md);
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.95rem;
+}
+
+.btnSecondary:hover {
+  background: var(--border);
+}
+
+.btnCancel {
+  background: transparent;
+  color: var(--text-secondary);
+  border: none;
+  padding: 8px;
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+
+.btnCancel:hover {
+  color: var(--danger);
+}
+
+/* Toast */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(15, 23, 42, 0.9);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+  padding: 12px 24px;
+  border-radius: var(--radius-lg);
+  font-weight: 700;
+  font-size: 0.9rem;
+  z-index: 10000;
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  direction: rtl;
+  animation: slideUp 0.3s forwards;
+}
+
+@keyframes slideUp {
+  from { transform: translate(-50%, 50px); opacity: 0; }
+  to { transform: translate(-50%, 0); opacity: 1; }
+}
+
