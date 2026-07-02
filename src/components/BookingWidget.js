@@ -138,7 +138,7 @@ export default function BookingWidget({ property }) {
           </p>
           <div className={styles.contactUs}>
             <Phone size={14} />
-            <span>للاستفسار العاجل: <strong>01xxxxxxxxx</strong></span>
+            <span>للاستفسار العاجل: <strong>01040122363</strong></span>
           </div>
         </div>
       ) : status === 'duplicate' ? (

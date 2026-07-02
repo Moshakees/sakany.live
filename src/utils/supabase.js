@@ -125,28 +125,37 @@ export const mockBookingRequests = [
   {
     id: 'booking-1',
     property_id: 'mock-1',
-    property: { title: 'شقة فاخرة للطلاب بجوار بوابة الجلاء مباشرة', location: 'بوابة الجلاء', price: 3200 },
+    property: { id: 'mock-1', title: 'شقة فاخرة للطلاب بجوار بوابة الجلاء مباشرة', location: 'بوابة الجلاء', price: 3200, rent_type: 'apartment',
+      landlord: { full_name: 'أ. محمد المنشاوي', phone: '01009876543' }
+    },
     landlord: { full_name: 'أ. محمد المنشاوي', phone: '01009876543' },
     student: { full_name: 'محمد سامي علي', phone: '01098765432' },
     status: 'pending',
+    requested_beds: null,
     created_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString()
   },
   {
     id: 'booking-2',
     property_id: 'mock-2',
-    property: { title: 'سكن طالبات راقي ومؤمن بالكامل - حي الجامعة', location: 'حي الجامعة', price: 4500 },
+    property: { id: 'mock-2', title: 'سرير في غرفة ثنائية - سكن طالبات راقي حي الجامعة', location: 'حي الجامعة', price: 1200, rent_type: 'bed',
+      landlord: { full_name: 'الحاجة أم أحمد', phone: '01223456789' }
+    },
     landlord: { full_name: 'الحاجة أم أحمد', phone: '01223456789' },
     student: { full_name: 'سارة أحمد محمود', phone: '01112345678' },
     status: 'contacted',
+    requested_beds: 1,
     created_at: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
   },
   {
     id: 'booking-3',
     property_id: 'mock-4',
-    property: { title: 'شقة طالبات واسعة وقريبة من بوابة توشكى', location: 'بوابة توشكى', price: 3800 },
+    property: { id: 'mock-4', title: 'شقة طالبات واسعة وقريبة من بوابة توشكى', location: 'بوابة توشكى', price: 3800, rent_type: 'apartment',
+      landlord: { full_name: 'مهندس سامح عبد الهادي', phone: '01114567890' }
+    },
     landlord: { full_name: 'مهندس سامح عبد الهادي', phone: '01114567890' },
     student: { full_name: 'نور الهدى سعيد', phone: '01234567890' },
     status: 'completed',
+    requested_beds: null,
     created_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
   }
 ];

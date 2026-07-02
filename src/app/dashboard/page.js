@@ -1604,7 +1604,7 @@ export default function DashboardPage() {
 
                       {/* Property Details (Clickable Link) */}
                       <Link 
-                        href={`/properties/${booking.property?.id}`} 
+                        href={`/properties/${booking.property?.id || booking.property_id}`} 
                         target="_blank"
                         className={`${styles.partyCard} ${styles.partyCardHover}`}
                         style={{ 
@@ -1636,31 +1636,39 @@ export default function DashboardPage() {
                       </Link>
 
                       {/* Landlord Details (Only visible to admin) */}
-                      {isAdmin && (
-                        <div 
-                          className={styles.partyCard} 
-                          style={{ 
-                            borderColor: 'rgba(217,119,6,0.25)', 
-                            backgroundColor: 'var(--surface)',
-                            color: 'var(--text-primary)'
-                          }}
-                        >
-                          <div className={styles.partyLabel} style={{ color: '#d97706' }}>
-                            <User size={14} style={{ marginLeft: 4 }} /> صاحب العقار
-                          </div>
-                          <div className={styles.partyName} style={{ color: 'var(--text-primary)' }}>
-                            {booking.landlord?.full_name}
-                          </div>
-                          <a 
-                            href={`tel:${booking.landlord?.phone}`} 
-                            className={styles.partyPhone} 
-                            style={{ color: '#d97706' }}
+                      {isAdmin && (() => {
+                        // Support both: booking.landlord (mock) and booking.property.landlord (Supabase join)
+                        const landlord = booking.landlord || booking.property?.landlord;
+                        return (
+                          <div 
+                            className={styles.partyCard} 
+                            style={{ 
+                              borderColor: 'rgba(217,119,6,0.25)', 
+                              backgroundColor: 'var(--surface)',
+                              color: 'var(--text-primary)'
+                            }}
                           >
-                            <Phone size={14} style={{ marginLeft: 4 }} />
-                            <span>{booking.landlord?.phone}</span>
-                          </a>
-                        </div>
-                      )}
+                            <div className={styles.partyLabel} style={{ color: '#d97706' }}>
+                              <User size={14} style={{ marginLeft: 4 }} /> صاحب العقار
+                            </div>
+                            <div className={styles.partyName} style={{ color: 'var(--text-primary)' }}>
+                              {landlord?.full_name || '—'}
+                            </div>
+                            {landlord?.phone ? (
+                              <a 
+                                href={`tel:${landlord.phone}`} 
+                                className={styles.partyPhone} 
+                                style={{ color: '#d97706' }}
+                              >
+                                <Phone size={14} style={{ marginLeft: 4 }} />
+                                <span>{landlord.phone}</span>
+                              </a>
+                            ) : (
+                              <span style={{ fontSize: '0.83rem', color: 'var(--text-muted)' }}>لا يوجد رقم هاتف</span>
+                            )}
+                          </div>
+                        );
+                      })()}
                     </div>
 
                     {/* Change status actions (Admin only) or Status Indicator (Landlord/Broker) */}
