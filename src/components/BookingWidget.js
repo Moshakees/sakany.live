@@ -12,10 +12,14 @@ import {
   ShieldCheck,
   Sparkles,
   Minus,
-  Plus
+  Plus,
+  Heart,
+  RefreshCw
 } from 'lucide-react';
-import { createBookingRequest } from '@/utils/supabase';
+import { createBookingRequest, getUserBookings, cancelBookingRequest } from '@/utils/supabase';
 import styles from './BookingWidget.module.css';
+
+const FAVORITES_KEY = 'sakany_favorites';
 
 export default function BookingWidget({ property }) {
   const router = useRouter();
@@ -23,17 +27,49 @@ export default function BookingWidget({ property }) {
   const [status, setStatus] = useState('idle'); // idle | loading | success | duplicate | error
   const [mounted, setMounted] = useState(false);
   const [requestedBeds, setRequestedBeds] = useState(1);
+  const [pendingBooking, setPendingBooking] = useState(null);
+  const [isFavorited, setIsFavorited] = useState(false);
 
   const isBedRental = property?.rent_type === 'bed';
   const maxBeds = property?.available_beds ?? 1;
+
+  const checkFavorites = () => {
+    if (typeof window === 'undefined') return;
+    try {
+      const favs = JSON.parse(localStorage.getItem(FAVORITES_KEY) || '[]');
+      setIsFavorited(favs.includes(property.id));
+    } catch {
+      setIsFavorited(false);
+    }
+  };
+
+  const checkPendingBooking = async (userId) => {
+    try {
+      const { data } = await getUserBookings(userId);
+      if (data) {
+        // Find if there is any pending request (status === 'pending')
+        // We only warn if it is for a DIFFERENT property. If it is the SAME property,
+        // it is a simple duplicate and we show the duplicateBox.
+        const pending = data.find(b => b.status === 'pending' && (b.property_id !== property.id && b.property?.id !== property.id));
+        setPendingBooking(pending || null);
+      }
+    } catch (err) {
+      console.error('Error checking pending booking:', err);
+    }
+  };
 
   useEffect(() => {
     setMounted(true);
     const session = localStorage.getItem('sakany_session');
     if (session) {
-      try { setUser(JSON.parse(session)); } catch { /* ignore */ }
+      try {
+        const parsed = JSON.parse(session);
+        setUser(parsed);
+        checkPendingBooking(parsed.id);
+      } catch { /* ignore */ }
     }
-  }, []);
+    checkFavorites();
+  }, [property.id]);
 
   const handleBookingRequest = async () => {
     if (!user) {
@@ -42,6 +78,23 @@ export default function BookingWidget({ property }) {
     }
 
     setStatus('loading');
+
+    // Double check if they have a pending booking just before requesting
+    const { data: userBookings } = await getUserBookings(user.id);
+    const pending = userBookings?.find(b => b.status === 'pending' && (b.property_id !== property.id && b.property?.id !== property.id));
+    
+    if (pending) {
+      setPendingBooking(pending);
+      setStatus('idle');
+      return;
+    }
+
+    // Check if duplicate for this property
+    const isDup = userBookings?.find(b => b.status === 'pending' && (b.property_id === property.id || b.property?.id === property.id));
+    if (isDup) {
+      setStatus('duplicate');
+      return;
+    }
 
     const { error } = await createBookingRequest({
       propertyId: property.id,
@@ -53,8 +106,59 @@ export default function BookingWidget({ property }) {
 
     if (!error) {
       setStatus('success');
+      // Refresh pending bookings check
+      checkPendingBooking(user.id);
     } else if (error?.message === 'duplicate') {
       setStatus('duplicate');
+    } else {
+      setStatus('error');
+    }
+  };
+
+  const handleToggleFavorite = () => {
+    if (typeof window === 'undefined') return;
+    try {
+      const favs = JSON.parse(localStorage.getItem(FAVORITES_KEY) || '[]');
+      const exists = favs.includes(property.id);
+      const updated = exists
+        ? favs.filter(id => id !== property.id)
+        : [...favs, property.id];
+      localStorage.setItem(FAVORITES_KEY, JSON.stringify(updated));
+      setIsFavorited(!exists);
+      window.dispatchEvent(new Event('sakany_favorites_change'));
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleReplaceBooking = async () => {
+    if (!user || !pendingBooking) return;
+    
+    if (!window.confirm(`هل أنت متأكد من إلغاء حجزك الحالي لـ "${pendingBooking.property?.title || 'سكن آخر'}" واستبداله بهذا السكن؟`)) {
+      return;
+    }
+
+    setStatus('loading');
+
+    // Cancel old booking
+    const { error: cancelError } = await cancelBookingRequest(pendingBooking.id);
+    if (cancelError) {
+      setStatus('error');
+      return;
+    }
+
+    // Create new booking
+    const { error: bookingError } = await createBookingRequest({
+      propertyId: property.id,
+      studentId: user.id,
+      studentName: user.name,
+      studentPhone: user.phone || '—',
+      requestedBeds: isBedRental ? requestedBeds : 1
+    });
+
+    if (!bookingError) {
+      setStatus('success');
+      setPendingBooking(null);
     } else {
       setStatus('error');
     }
@@ -95,7 +199,7 @@ export default function BookingWidget({ property }) {
               type="button"
               className={styles.bedBtn}
               onClick={() => setRequestedBeds(Math.max(1, requestedBeds - 1))}
-              disabled={requestedBeds <= 1}
+              disabled={requestedBeds <= 1 || status === 'loading' || pendingBooking}
             >
               <Minus size={14} />
             </button>
@@ -104,7 +208,7 @@ export default function BookingWidget({ property }) {
               type="button"
               className={styles.bedBtn}
               onClick={() => setRequestedBeds(Math.min(maxBeds, requestedBeds + 1))}
-              disabled={requestedBeds >= maxBeds}
+              disabled={requestedBeds >= maxBeds || status === 'loading' || pendingBooking}
             >
               <Plus size={14} />
             </button>
@@ -171,6 +275,72 @@ export default function BookingWidget({ property }) {
               <AlertCircle size={18} />
               <p>الحجز متاح فقط لحسابات الطلاب.</p>
             </div>
+          ) : pendingBooking ? (
+            /* Warning state: User already has a pending booking for another property */
+            <div style={{
+              background: '#fef3c7',
+              border: '1px solid #f59e0b',
+              borderRadius: 'var(--radius-md)',
+              padding: 16,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 12
+            }}>
+              <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start', color: '#b45309' }}>
+                <AlertCircle size={18} style={{ flexShrink: 0, marginTop: 2 }} />
+                <div style={{ fontSize: '0.85rem', fontWeight: 600, lineHeight: 1.5 }}>
+                  لديك حجز قيد المراجعة بالفعل لـ:
+                  <div style={{ fontWeight: 800, marginTop: 4, color: 'var(--text-primary)' }}>
+                    "{pendingBooking.property?.title || 'سكن آخر'}"
+                  </div>
+                  يرجى إلغاؤه أو استبداله لتتمكن من حجز هذا السكن.
+                </div>
+              </div>
+              
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <button
+                  onClick={handleReplaceBooking}
+                  disabled={status === 'loading'}
+                  className={styles.bookBtn}
+                  style={{
+                    padding: '12px',
+                    fontSize: '0.95rem',
+                    background: 'linear-gradient(135deg, #d97706, #b45309)',
+                    boxShadow: '0 4px 12px rgba(217, 119, 6, 0.25)'
+                  }}
+                >
+                  {status === 'loading' ? (
+                    <Clock size={16} className={styles.spinner} />
+                  ) : (
+                    <RefreshCw size={16} />
+                  )}
+                  <span>إلغاء القديم واستبداله بهذا</span>
+                </button>
+
+                <button
+                  onClick={handleToggleFavorite}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 8,
+                    padding: '12px',
+                    background: 'var(--surface)',
+                    border: '1px solid var(--border)',
+                    borderRadius: 'var(--radius-md)',
+                    color: isFavorited ? '#ef4444' : 'var(--text-primary)',
+                    fontFamily: 'inherit',
+                    fontSize: '0.9rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    transition: 'var(--transition)'
+                  }}
+                >
+                  <Heart size={16} fill={isFavorited ? '#ef4444' : 'none'} style={{ color: isFavorited ? '#ef4444' : 'var(--text-muted)' }} />
+                  <span>{isFavorited ? 'إزالة من المفضلة' : 'حفظ في المفضلة'}</span>
+                </button>
+              </div>
+            </div>
           ) : (
             <button
               onClick={handleBookingRequest}
@@ -201,4 +371,3 @@ export default function BookingWidget({ property }) {
     </div>
   );
 }
-

@@ -2021,3 +2021,62 @@ export async function getWalletTransactions(brokerId = null) {
     return { data: null, error };
   }
 }
+
+// Get all bookings submitted by a student
+export async function getUserBookings(studentId) {
+  if (isDemoMode) {
+    // In demo mode, fetch student bookings by matching student phone or id
+    const profile = mockProfiles.find(p => p.id === studentId);
+    const filtered = mockBookingRequests.filter(b => 
+      b.student?.phone === profile?.phone || b.student_id === studentId
+    );
+    return { data: filtered, error: null };
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('booking_requests')
+      .select(`
+        *,
+        property:property_id(
+          id,
+          title,
+          location,
+          price,
+          images,
+          rent_type,
+          available_beds,
+          landlord:landlord_id(full_name, phone)
+        )
+      `)
+      .eq('student_id', studentId)
+      .order('created_at', { ascending: false });
+    return { data, error };
+  } catch (error) {
+    return { data: null, error };
+  }
+}
+
+// Cancel a booking request
+export async function cancelBookingRequest(bookingId) {
+  if (isDemoMode) {
+    const booking = mockBookingRequests.find(b => b.id === bookingId);
+    if (booking) {
+      booking.status = 'canceled';
+    }
+    return { data: booking, error: null };
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('booking_requests')
+      .update({ status: 'canceled' })
+      .eq('id', bookingId)
+      .select()
+      .single();
+    return { data, error };
+  } catch (error) {
+    return { data: null, error };
+  }
+}
+

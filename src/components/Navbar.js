@@ -224,6 +224,20 @@ export default function Navbar() {
                     <span>مفضلتي</span>
                   </Link>
 
+                  {user && user.role === 'student' && (
+                    <Link 
+                      href="/bookings" 
+                      className={styles.dropdownItem}
+                      onClick={() => {
+                        setDropdownOpen(false);
+                        setIsOpen(false);
+                      }}
+                    >
+                      <span style={{ fontSize: '1.05rem', lineHeight: 1 }}>📅</span>
+                      <span>حجوزاتي</span>
+                    </Link>
+                  )}
+
                   {user && user.role === 'broker' && (
                     <Link 
                       href="/wallet" 
