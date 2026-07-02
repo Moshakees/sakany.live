@@ -7,6 +7,12 @@ export const metadata = {
   title: "سَكني | سكن الطلاب والطالبات في المنصورة - موثق وآمن",
   description: "المنصة الأكثر أماناً للبحث عن شقق وسكن للطلاب والطالبات في المنصورة. تواصل مباشر مع الملاك وسكن موثق 100% يقضي على السماسرة والنصب.",
   robots: "index, follow",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "سَكني",
+  },
   openGraph: {
     title: "سَكني | سكن الطلاب والطالبات في المنصورة",
     description: "تصفح مئات الشقق الموثقة للطلاب في المنصورة بالقرب من الجامعة. سكن موثق وآمن يضمن حقوق الجميع.",
