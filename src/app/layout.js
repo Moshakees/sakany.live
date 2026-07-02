@@ -14,7 +14,7 @@ export const metadata = {
     title: "سَكني",
   },
   openGraph: {
-    title: "سَكني | سكن الطلاب والطالبات في المنصورة",
+    title: "سَكني | sakany",
     description: "تصفح مئات الشقق الموثقة للطلاب في المنصورة بالقرب من الجامعة. سكن موثق وآمن يضمن حقوق الجميع.",
     type: "website",
     locale: "ar_EG",
