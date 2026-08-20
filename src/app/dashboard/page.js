@@ -154,6 +154,7 @@ export default function DashboardPage() {
   const [compressing, setCompressing] = useState(false);
   const [videoUrl, setVideoUrl] = useState('');
   const [uploadingVideo, setUploadingVideo] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [videoInputType, setVideoInputType] = useState('upload');
 
   // States for broker verification
@@ -374,21 +375,8 @@ export default function DashboardPage() {
 
   const removeImage = (index) => setImages(prev => prev.filter((_, idx) => idx !== index));
 
-  const handleVideoUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    if (file.size > 100 * 1024 * 1024) {
-      setErrorMsg('حجم الفيديو كبير جداً. الحد الأقصى للملف هو 100 ميجابايت.');
-      return;
-    }
-
-    setUploadingVideo(true);
-    setErrorMsg('');
-    setSuccessMsg('');
-
+  const uploadViaApiRoute = async (file) => {
     try {
-      // 1. Attempt direct upload to Internet Archive via API route
       const formData = new FormData();
       formData.append('file', file);
 
@@ -406,7 +394,7 @@ export default function DashboardPage() {
         return;
       }
 
-      // If IA keys are missing or failed, check Cloudinary as fallback
+      // Check Cloudinary fallback
       const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
       const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
 
@@ -429,18 +417,83 @@ export default function DashboardPage() {
         }
       }
 
-      // Demo mode fallback if no keys configured
-      setTimeout(() => {
-        setVideoUrl('https://assets.mixkit.co/videos/preview/mixkit-modern-apartment-interior-design-41907-large.mp4');
-        setSuccessMsg('💡 (وضع العرض التجريبي) تم إرفاق فيديو تجريبي. للرفع الحقيقي على Internet Archive أضف مفاتيح S3 في .env.local');
-        setUploadingVideo(false);
-      }, 1500);
-
+      setErrorMsg(data.error || 'فشل رفع الفيديو. يمكنك محاولة إضافة رابط مباشر بدلاً من الرفع.');
+      setUploadingVideo(false);
     } catch (err) {
       console.error('Video upload error:', err);
-      setErrorMsg('حدث خطأ أثناء رفع الفيديو. يرجى المحاولة مرة أخرى.');
+      setErrorMsg('حدث خطأ أثناء رفع الفيديو.');
       setUploadingVideo(false);
     }
+  };
+
+  const handleVideoUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (file.size > 200 * 1024 * 1024) {
+      setErrorMsg('حجم الفيديو كبير جداً. الحد الأقصى للملف هو 200 ميجابايت.');
+      return;
+    }
+
+    setUploadingVideo(true);
+    setUploadProgress(0);
+    setErrorMsg('');
+    setSuccessMsg('');
+
+    const accessKey = process.env.NEXT_PUBLIC_IA_ACCESS_KEY || process.env.IA_ACCESS_KEY;
+    const secretKey = process.env.NEXT_PUBLIC_IA_SECRET_KEY || process.env.IA_SECRET_KEY;
+
+    const originalName = file.name || 'property-video.mp4';
+    const cleanFileName = originalName.replace(/[^a-zA-Z0-9._-]/g, '_');
+    const identifier = `sakany-video-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+
+    // Direct Client-side S3 Upload to Internet Archive with Progress Bar
+    if (accessKey && secretKey) {
+      try {
+        const xhr = new XMLHttpRequest();
+        const iaUploadUrl = `https://s3.us.archive.org/${identifier}/${cleanFileName}`;
+
+        xhr.open('PUT', iaUploadUrl);
+        xhr.setRequestHeader('authorization', `LOW ${accessKey}:${secretKey}`);
+        xhr.setRequestHeader('x-archive-auto-make-bucket', '1');
+        xhr.setRequestHeader('x-archive-meta-mediatype', 'movies');
+        xhr.setRequestHeader('x-archive-meta-title', `Sakany Property Video ${identifier}`);
+        xhr.setRequestHeader('x-archive-meta-collection', 'opensource_movies');
+        if (file.type) {
+          xhr.setRequestHeader('Content-Type', file.type);
+        }
+
+        xhr.upload.onprogress = (event) => {
+          if (event.lengthComputable) {
+            const percent = Math.round((event.loaded / event.total) * 100);
+            setUploadProgress(percent);
+          }
+        };
+
+        xhr.onload = () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            const detailUrl = `https://archive.org/details/${identifier}`;
+            setVideoUrl(detailUrl);
+            setSuccessMsg('✨ تم رفع الفيديو وتخزينه بنجاح على Internet Archive!');
+            setUploadingVideo(false);
+          } else {
+            uploadViaApiRoute(file);
+          }
+        };
+
+        xhr.onerror = () => {
+          uploadViaApiRoute(file);
+        };
+
+        xhr.send(file);
+        return;
+      } catch (err) {
+        console.error('Client upload error:', err);
+      }
+    }
+
+    // Fallback to API route if direct S3 is not available
+    uploadViaApiRoute(file);
   };
 
   const handleAddListing = async (e) => {
@@ -3159,11 +3212,21 @@ export default function DashboardPage() {
                   <div>
                     <input type="file" accept="video/*" onChange={handleVideoUpload} className="form-input"
                       style={{ padding: '8px', cursor: 'pointer' }} disabled={uploadingVideo} />
-                    <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginTop: 4 }}>
-                      {uploadingVideo
-                        ? '🔄 جاري رفع الفيديو وتخزينه خارجياً على Internet Archive...'
-                        : '💡 اختر فيديو الشقة من جهازك ليتم رفعه وتخزينه خارجياً مجاناً على Internet Archive.'}
-                    </span>
+                    {uploadingVideo ? (
+                      <div style={{ marginTop: 8 }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', marginBottom: 4, color: 'var(--primary)', fontWeight: 'bold' }}>
+                          <span>🔄 جاري رفع الفيديو وتخزينه على Internet Archive...</span>
+                          <span>{uploadProgress}%</span>
+                        </div>
+                        <div style={{ width: '100%', height: 8, backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: 4, overflow: 'hidden' }}>
+                          <div style={{ width: `${uploadProgress}%`, height: '100%', backgroundColor: 'var(--primary)', transition: 'width 0.2s ease' }} />
+                        </div>
+                      </div>
+                    ) : (
+                      <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginTop: 4 }}>
+                        💡 اختر فيديو الشقة من جهازك ليتم رفعه وتخزينه خارجياً مجاناً على Internet Archive.
+                      </span>
+                    )}
                   </div>
                 ) : (
                   <div>
