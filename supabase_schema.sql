@@ -42,6 +42,7 @@ create table public.properties (
   review_status text check (review_status in ('pending_review', 'approved', 'rejected')) default 'pending_review',
   rejection_reason text,
   views_count integer default 0,
+  video_url text,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
@@ -82,6 +83,7 @@ create policy "Landlords/Brokers can delete their own properties" on public.prop
 -- ALTER TABLE public.properties ADD COLUMN IF NOT EXISTS review_status text check (review_status in ('pending_review', 'approved', 'rejected')) default 'pending_review';
 -- ALTER TABLE public.properties ADD COLUMN IF NOT EXISTS rejection_reason text;
 -- ALTER TABLE public.properties ADD COLUMN IF NOT EXISTS beds integer default 1 check (beds >= 0);
+-- ALTER TABLE public.properties ADD COLUMN IF NOT EXISTS video_url text;
 -- UPDATE public.properties SET review_status = 'approved' WHERE review_status IS NULL;
 
 -- Create booking_requests table for mediator bookings

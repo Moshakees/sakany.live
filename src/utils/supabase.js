@@ -321,7 +321,7 @@ export async function getPropertyById(id) {
     const client = (typeof window === 'undefined' && supabaseAdmin) ? supabaseAdmin : supabase;
     const { data, error } = await client
       .from('properties')
-      .select('id,landlord_id,title,description,price,location,rooms,bathrooms,beds,gender_type,images,is_verified,is_featured,status,views_count,created_at,has_ac,has_internet,has_elevator,floor,review_status,rejection_reason,rent_type,available_beds')
+      .select('id,landlord_id,title,description,price,location,rooms,bathrooms,beds,gender_type,images,video_url,is_verified,is_featured,status,views_count,created_at,has_ac,has_internet,has_elevator,floor,review_status,rejection_reason,rent_type,available_beds')
       .eq('id', id)
       .single();
     return { data, error };

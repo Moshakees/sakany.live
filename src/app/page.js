@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import {
   Search,
@@ -20,11 +20,19 @@ import { useRouter } from 'next/navigation';
 import styles from './page.module.css';
 import { getProperties, isDemoMode } from '@/utils/supabase';
 
+const HERO_SLIDES = [
+  { src: '/hero1.png', alt: 'غرفة طالب مؤثثة بالكامل' },
+  { src: '/hero2.png', alt: 'مبنى سكني حديث في المنصورة' },
+  { src: '/hero3.png', alt: 'صالة شقة طلابية مريحة' },
+  { src: '/hero4.png', alt: 'كورنيش النيل في المنصورة' },
+];
+
 export default function Home() {
   const router = useRouter();
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [heroIndex, setHeroIndex] = useState(0);
 
   // Search & Filter State
   const [searchQuery, setSearchQuery] = useState('');
@@ -44,6 +52,14 @@ export default function Home() {
 
   useEffect(() => {
     fetchListings();
+  }, []);
+
+  // Hero auto-slide every 5 seconds
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setHeroIndex(i => (i + 1) % HERO_SLIDES.length);
+    }, 5000);
+    return () => clearInterval(timer);
   }, []);
 
   const handleSearchSubmit = (e) => {
@@ -67,7 +83,52 @@ export default function Home() {
     }
   };
 
-  const renderHorizontalSection = (title, viewAllHref, list) => {
+  // ── Card image slider (auto-rotates through property images every 5s) ──
+  function CardImageSlider({ images, title }) {
+    const imgs = images && images.length > 0
+      ? images
+      : ['https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=800&q=80'];
+
+    const [idx, setIdx] = useState(0);
+
+    useEffect(() => {
+      if (imgs.length <= 1) return;
+      const t = setInterval(() => setIdx(i => (i + 1) % imgs.length), 5000);
+      return () => clearInterval(t);
+    }, [imgs.length]);
+
+    return (
+      <div className={styles.imageContainer}>
+        {imgs.map((src, i) => (
+          <img
+            key={src + i}
+            src={src}
+            alt={title}
+            className={styles.image}
+            style={{
+              position: i === 0 ? 'relative' : 'absolute',
+              inset: 0,
+              opacity: i === idx ? 1 : 0,
+              transition: 'opacity 0.8s ease',
+              zIndex: i === idx ? 1 : 0,
+            }}
+          />
+        ))}
+        {imgs.length > 1 && (
+          <div className={styles.cardDots}>
+            {imgs.map((_, i) => (
+              <span
+                key={i}
+                className={`${styles.cardDot} ${i === idx ? styles.cardDotActive : ''}`}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  const renderSection = (title, viewAllHref, list) => {
     if (list.length === 0) return null;
     return (
       <div className={styles.horizontalSection}>
@@ -84,25 +145,20 @@ export default function Home() {
         <div className={styles.scrollRow}>
           {list.map((property) => (
             <div key={property.id} className={`${styles.card} ${styles.scrollCard}`}>
-              {/* Property Image & Badges */}
-              <div className={styles.imageContainer}>
-                <img
-                  src={property.images[0] || 'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=800&q=80'}
-                  alt={property.title}
-                  className={styles.image}
-                />
+              {/* Card Slider */}
+              <CardImageSlider images={property.images} title={property.title} />
 
+              {/* Badges over image — rendered after slider so they sit on top */}
+              <div style={{ position: 'relative' }}>
                 {property.is_verified && (
-                  <div className={`${styles.verifiedBadge} badge badge-verified`}>
-                    <CheckCircle size={14} style={{ marginLeft: '4px' }} />
+                  <div className={`${styles.verifiedBadge} badge badge-verified`} style={{ position: 'absolute', top: -170, right: 10, zIndex: 10 }}>
+                    <CheckCircle size={12} style={{ marginLeft: '3px' }} />
                     <span>موثق</span>
                   </div>
                 )}
-
                 <div className={styles.rentTypeBadge}>
                   {property.rent_type === 'bed' ? '🛌 نظام سراير' : '🏢 شقة كاملة'}
                 </div>
-
                 <div className={`${styles.genderBadge} badge ${getGenderClass(property.gender_type)}`}>
                   <span>{getGenderName(property.gender_type)}</span>
                 </div>
@@ -111,42 +167,39 @@ export default function Home() {
               {/* Card Body */}
               <div className={styles.cardBody}>
                 <div className={styles.cardLocation}>
-                  <MapPin size={14} style={{ marginLeft: '4px', verticalAlign: 'middle' }} />
+                  <MapPin size={13} style={{ marginLeft: '4px', verticalAlign: 'middle' }} />
                   <span>{property.location}</span>
                 </div>
 
                 <h3 className={styles.cardTitle}>{property.title}</h3>
 
-                {/* Specs */}
                 <div className={styles.specs}>
                   {property.rent_type === 'bed' ? (
                     <div className={styles.specItem}>
-                      <BedDouble size={16} />
+                      <BedDouble size={14} />
                       <span>متاح {property.available_beds} من {property.beds} سراير</span>
                     </div>
                   ) : (
                     <>
                       <div className={styles.specItem}>
-                        <BedDouble size={16} />
+                        <BedDouble size={14} />
                         <span>{property.rooms} غرف</span>
                       </div>
                       <div className={styles.specItem}>
-                        <Bath size={16} />
+                        <Bath size={14} />
                         <span>{property.bathrooms} حمام</span>
                       </div>
                     </>
                   )}
                 </div>
 
-                {/* Price and Action */}
                 <div className={styles.priceWrapper}>
                   <div className={styles.priceText}>
-                    <span>{property.price}</span>
+                    <span>{property.price?.toLocaleString('ar-EG')}</span>
                     <span className={styles.priceUnit}>
                       {property.rent_type === 'bed' ? ' ج.م / سرير شهرياً' : ' ج.م / شهر'}
                     </span>
                   </div>
-
                   <Link href={`/properties/${property.id}`} className={styles.detailBtn}>
                     التفاصيل
                   </Link>
@@ -163,15 +216,30 @@ export default function Home() {
     <div dir="rtl">
       {/* 1. HERO SECTION */}
       <header className={styles.hero}>
+        {/* Background Slideshow */}
+        <div className={styles.heroSlides} aria-hidden="true">
+          {HERO_SLIDES.map((slide, i) => (
+            <div
+              key={slide.src}
+              className={`${styles.heroSlide} ${i === heroIndex ? styles.heroSlideActive : ''}`}
+              style={{ backgroundImage: `url(${slide.src})` }}
+            />
+          ))}
+        </div>
+
+        {/* Dark gradient overlay for readability */}
+        <div className={styles.heroOverlay} aria-hidden="true" />
+
+        {/* Content */}
         <div className={`${styles.heroContent} container`}>
-          <div className="badge badge-verified animate-fade-in" style={{ backgroundColor: 'rgba(52, 211, 153, 0.15)', color: '#34d399', border: '1px solid rgba(52, 211, 153, 0.3)' }}>
+          <div className="badge badge-verified animate-fade-in" style={{ backgroundColor: 'rgba(52, 211, 153, 0.15)', color: '#34d399', border: '1px solid rgba(52, 211, 153, 0.4)' }}>
             <ShieldCheck size={16} />
             <span>سكن آمن وموثق 100% في المنصورة</span>
           </div>
 
           <h1 className={`${styles.heroTitle} animate-fade-in`}>
             ابحث عن سكنك الطلابي في المنصورة <br />
-            <span className={styles.heroTitleHighlight}>بكل سهولة وأمان وضمان ضد النصب</span>
+            <span className={styles.heroTitleHighlight}>بكل سهولة وأمان ومن غير لف كتير</span>
           </h1>
 
           <p className={`${styles.heroSubtitle} animate-fade-in`}>
@@ -210,37 +278,40 @@ export default function Home() {
           {/* Quick Filters */}
           <div className={styles.quickFilters}>
             <Link href="/search" className={styles.filterBadge}>الكل</Link>
-            <Link href="/search?rent_type=bed" className={styles.filterBadge}>🛌 نظام السراير (تأجير بالسرير)</Link>
+            <Link href="/search?rent_type=bed" className={styles.filterBadge}>🛌 نظام السراير</Link>
             <Link href="/search?rent_type=apartment" className={styles.filterBadge}>🏢 شقق كاملة</Link>
             <Link href="/search?gender=male" className={styles.filterBadge}>سكن شباب (ذكور)</Link>
             <Link href="/search?gender=female" className={styles.filterBadge}>سكن طالبات (إناث)</Link>
           </div>
+
+          {/* Slide dots */}
+          <div className={styles.heroDots} role="tablist" aria-label="صور الخلفية">
+            {HERO_SLIDES.map((_, i) => (
+              <button
+                key={i}
+                role="tab"
+                aria-selected={i === heroIndex}
+                aria-label={`صورة ${i + 1}`}
+                className={`${styles.heroDot} ${i === heroIndex ? styles.heroDotActive : ''}`}
+                onClick={() => setHeroIndex(i)}
+              />
+            ))}
+          </div>
         </div>
       </header>
 
-      {/* 2. MAIN PROPERTIES LISTINGS SECTION */}
+      {/* 2. LISTINGS SECTION */}
       <section className={styles.section}>
         <div className="container">
-          <div className={styles.sectionHeader}>
-            <div className={styles.sectionTitleInfo}>
-              <h2 className={styles.sectionTitle}>العروض المتاحة حالياً</h2>
-              <p className={styles.sectionSubtitle}>
-                شقق وغرف طلابية مجهزة وقريبة من كليات جامعة المنصورة
-              </p>
-            </div>
-
-          </div>
-
           {loading ? (
-            /* Loading Skeleton */
             <div className={styles.scrollRow}>
               {[1, 2, 3].map((n) => (
                 <div key={n} className={`${styles.card} ${styles.scrollCard}`} style={{ height: '360px' }}>
-                  <div className="skeleton" style={{ height: '180px', width: '100%' }}></div>
-                  <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                    <div className="skeleton" style={{ height: '16px', width: '40%' }}></div>
-                    <div className="skeleton" style={{ height: '20px', width: '80%' }}></div>
-                    <div className="skeleton" style={{ height: '16px', width: '60%' }}></div>
+                  <div className="skeleton" style={{ height: '180px', width: '100%' }} />
+                  <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    <div className="skeleton" style={{ height: '14px', width: '40%' }} />
+                    <div className="skeleton" style={{ height: '18px', width: '80%' }} />
+                    <div className="skeleton" style={{ height: '14px', width: '60%' }} />
                   </div>
                 </div>
               ))}
@@ -258,47 +329,23 @@ export default function Home() {
             </div>
           ) : (
             <>
-              {/* 1. قسم الشقق المميزة */}
-              {renderHorizontalSection(
-                'الشقق المميزة والموصى بها',
-                '/search?featured=true',
-                properties.filter((p) => p.is_featured)
-              )}
+              {/* 1. شقق سكني — المميزة */}
+              {renderSection('🏠 شقق سكني', '/search?featured=true', properties.filter(p => p.is_featured))}
 
-              {/* 2. قسم نظام السراير (تأجير بالسرير) */}
-              {renderHorizontalSection(
-                '🛌 غرف وسراير طلابية متاحة (تأجير بالسرير)',
-                '/search?rent_type=bed',
-                properties.filter((p) => p.rent_type === 'bed')
-              )}
+              {/* 2. جميع الشقق */}
+              {renderSection('📋 جميع الشقق', '/search', properties)}
 
-              {/* 3. قسم الكل */}
-              {renderHorizontalSection(
-                'جميع العروض المتاحة',
-                '/search',
-                properties
-              )}
+              {/* 3. تأجير السرير */}
+              {renderSection('🛌 تأجير السرير', '/search?rent_type=bed', properties.filter(p => p.rent_type === 'bed'))}
 
-              {/* 4. قسم سكن شباب */}
-              {renderHorizontalSection(
-                'سكن شباب (ذكور)',
-                '/search?gender=male',
-                properties.filter((p) => p.gender_type === 'male')
-              )}
+              {/* 4. سكن شباب */}
+              {renderSection('👨‍🎓 سكن شباب (ذكور)', '/search?gender=male', properties.filter(p => p.gender_type === 'male'))}
 
-              {/* 5. قسم سكن بنات */}
-              {renderHorizontalSection(
-                'سكن طالبات (إناث)',
-                '/search?gender=female',
-                properties.filter((p) => p.gender_type === 'female')
-              )}
+              {/* 5. سكن طالبات */}
+              {renderSection('👩‍🎓 سكن طالبات (إناث)', '/search?gender=female', properties.filter(p => p.gender_type === 'female'))}
 
-              {/* 5. قسم مشترك/عائلات */}
-              {renderHorizontalSection(
-                'سكن مشترك وعائلات',
-                '/search?gender=any',
-                properties.filter((p) => p.gender_type === 'any')
-              )}
+              {/* 6. مشترك/عائلات */}
+              {renderSection('🏘️ سكن مشترك وعائلات', '/search?gender=any', properties.filter(p => p.gender_type === 'any'))}
             </>
           )}
         </div>
@@ -339,9 +386,9 @@ export default function Home() {
               <div className={styles.safetyIconWrapper}>
                 <MessageCircle size={32} />
               </div>
-              <h3 className={styles.safetyCardTitle}>بلاغات نشطة وفورية</h3>
+              <h3 className={styles.safetyCardTitle}>ثقة العملاء اولوية</h3>
               <p className={styles.safetyCardText}>
-                يمكن للطلاب الإبلاغ الفوري عن أي شقة يكتشفون عدم دقة بياناتها، وسيقوم فريق الدعم بمراجعة الإعلان وحظر المالك فوراً إن ثبت تلاعبه.
+                ولان ثقة العميل مهمة بالنسبه لينا بنتأكد بنفسنا من كل حاجه وبنكون موجودين لحد ما تستلم شقتك بامان
               </p>
             </div>
           </div>

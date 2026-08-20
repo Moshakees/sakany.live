@@ -111,6 +111,75 @@ export default async function PropertyDetailsPage({ params }) {
           {/* Gallery */}
           <ImageGallery images={property.images} title={property.title} propertyId={property.id} />
 
+          {/* Video Section (if exists) */}
+          {property.video_url && (
+            <div style={{
+              marginTop: 24,
+              backgroundColor: 'var(--surface)',
+              border: '1px solid var(--border)',
+              borderRadius: 'var(--radius-lg)',
+              padding: 20,
+              boxShadow: 'var(--shadow-sm)'
+            }}>
+              <h3 style={{
+                fontSize: '1.2rem',
+                fontWeight: 800,
+                color: 'var(--text-primary)',
+                marginBottom: 16,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8
+              }}>
+                <span style={{ fontSize: '1.3rem' }}>🎥</span>
+                <span>فيديو معاينة السكن</span>
+              </h3>
+              <div style={{
+                position: 'relative',
+                width: '100%',
+                borderRadius: 'var(--radius-md)',
+                overflow: 'hidden',
+                backgroundColor: '#000',
+                aspectRatio: '16/9'
+              }}>
+                {property.video_url.includes('youtube.com') || property.video_url.includes('youtu.be') ? (
+                  // YouTube Video Embed
+                  (() => {
+                    let videoId = '';
+                    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+                    const match = property.video_url.match(regExp);
+                    if (match && match[2].length === 11) {
+                      videoId = match[2];
+                    }
+                    return videoId ? (
+                      <iframe
+                        src={`https://www.youtube.com/embed/${videoId}`}
+                        title="YouTube video player"
+                        frameBorder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                        style={{ width: '100%', height: '100%', border: 'none' }}
+                      />
+                    ) : (
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#fff' }}>
+                        <a href={property.video_url} target="_blank" rel="noreferrer" style={{ color: 'var(--primary)' }}>
+                          اضغط هنا لفتح رابط الفيديو الخارجي
+                        </a>
+                      </div>
+                    );
+                  })()
+                ) : (
+                  // Direct Video URL (HTML5 player)
+                  <video
+                    src={property.video_url}
+                    controls
+                    preload="metadata"
+                    style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                  />
+                )}
+              </div>
+            </div>
+          )}
+
           {/* Title & badges */}
           <div className={styles.headerSection}>
             <div className={styles.badges}>
@@ -155,27 +224,15 @@ export default async function PropertyDetailsPage({ params }) {
               </div>
 
               {/* Sakany fee notice */}
-              <div style={{
-                marginTop: 12,
-                background: 'linear-gradient(135deg, rgba(37,99,235,0.06), rgba(124,58,237,0.06))',
-                border: '1px solid rgba(37,99,235,0.18)',
-                borderRight: '4px solid #2563eb',
-                borderRadius: 'var(--radius-md)',
-                padding: '14px 18px',
-                display: 'flex',
-                gap: 12,
-                alignItems: 'flex-start'
-              }}>
-                <Info size={20} style={{ color: '#2563eb', flexShrink: 0, marginTop: 2 }} />
-                <div>
-                  <div style={{ fontWeight: 800, fontSize: '0.95rem', color: '#1e40af', marginBottom: 4 }}>
+              <div className={styles.feeBox}>
+                <Info size={18} style={{ color: '#2563eb', flexShrink: 0, marginTop: 2 }} />
+                <div style={{ minWidth: 0 }}>
+                  <div className={styles.feeBoxTitle}>
                     رسوم خدمة سكني (تُدفع مرة واحدة فقط)
                   </div>
-                  <div style={{ fontSize: '0.9rem', color: '#1e40af', lineHeight: 1.7 }}>
+                  <div className={styles.feeBoxText}>
                     عند توقيع العقد واستلامك الشقة، يُستحق سداد{' '}
-                    <strong style={{ fontSize: '1.05rem' }}>
-                      {sakanyFee.toLocaleString('ar-EG')} ج.م
-                    </strong>{' '}
+                    <strong>{sakanyFee.toLocaleString('ar-EG')} ج.م</strong>{' '}
                     كرسوم خدمة لمنصة سكني (50% من الإيجار الشهري)، وتُدفع <strong>مرة واحدة فقط</strong>.
                     هذه الرسوم تشمل التوثيق الميداني وضمان التعاقد والوساطة بينك وبين المالك.
                   </div>
@@ -185,43 +242,31 @@ export default async function PropertyDetailsPage({ params }) {
           </div>
 
           {/* ── Full Specs Grid ─────────────────────────────────────── */}
-          <div style={{ marginTop: 24, marginBottom: 20 }}>
-            <h2 className={styles.sectionTitle} style={{ marginBottom: 14 }}>مواصفات الشقة</h2>
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))',
-              gap: 12
-            }}>
+          <div className={styles.specsSection}>
+            <h2 className={styles.sectionTitle}>مواصفات الشقة</h2>
+            <div className={styles.specsGrid}>
               {[
-                { icon: <MapPin size={18} />, label: 'المنطقة', value: property.location, color: '#7c3aed' },
+                { icon: <MapPin size={16} />, label: 'المنطقة', value: property.location, color: '#7c3aed' },
                 ...(property.rent_type === 'bed' ? [
-                  { icon: <BedDouble size={18} />, label: 'السراير المتاحة', value: `${property.available_beds ?? property.beds ?? '—'} سرير`, color: '#059669' },
-                  { icon: <Bed size={18} />, label: 'إجمالي السراير', value: `${property.beds ?? '—'} سرير`, color: '#d97706' },
+                  { icon: <BedDouble size={16} />, label: 'السراير المتاحة', value: `${property.available_beds ?? property.beds ?? '—'} سرير`, color: '#059669' },
+                  { icon: <Bed size={16} />, label: 'إجمالي السراير', value: `${property.beds ?? '—'} سرير`, color: '#d97706' },
                 ] : [
-                  { icon: <BedDouble size={18} />, label: 'عدد الغرف', value: `${property.rooms} غرفة`, color: '#2563eb' },
-                  { icon: <Bath size={18} />, label: 'الحمامات', value: `${property.bathrooms} حمام`, color: '#0891b2' },
-                  { icon: <Bed size={18} />, label: 'عدد الأسرّة', value: `${property.beds ?? '—'} سرير`, color: '#d97706' },
+                  { icon: <BedDouble size={16} />, label: 'عدد الغرف', value: `${property.rooms} غرفة`, color: '#2563eb' },
+                  { icon: <Bath size={16} />, label: 'الحمامات', value: `${property.bathrooms} حمام`, color: '#0891b2' },
+                  { icon: <Bed size={16} />, label: 'عدد الأسرّة', value: `${property.beds ?? '—'} سرير`, color: '#d97706' },
                 ]),
-                { icon: <Layers size={18} />, label: 'الدور', value: floorLabel, color: '#059669' },
-                { icon: <Eye size={18} />, label: 'المشاهدات', value: `${(property.views_count || 0) + 1}`, color: '#64748b' },
-                ...(property.has_ac    ? [{ icon: <Wind size={18} />,  label: 'تكييف',           value: 'متوفر ✓',    color: '#0ea5e9' }] : []),
-                ...(property.has_internet ? [{ icon: <Wifi size={18} />,  label: 'إنترنت WiFi',    value: 'متوفر ✓',    color: '#8b5cf6' }] : []),
-                ...(property.has_elevator ? [{ icon: <Layers size={18} />, label: 'مصعد (أسانسير)', value: 'متوفر ✓',    color: '#10b981' }] : []),
+                { icon: <Layers size={16} />, label: 'الدور', value: floorLabel, color: '#059669' },
+                { icon: <Eye size={16} />, label: 'المشاهدات', value: `${(property.views_count || 0) + 1}`, color: '#64748b' },
+                ...(property.has_ac    ? [{ icon: <Wind size={16} />,  label: 'تكييف',      value: 'متوفر ✓', color: '#0ea5e9' }] : []),
+                ...(property.has_internet ? [{ icon: <Wifi size={16} />, label: 'إنترنت',    value: 'متوفر ✓', color: '#8b5cf6' }] : []),
+                ...(property.has_elevator ? [{ icon: <Layers size={16} />, label: 'مصعد',    value: 'متوفر ✓', color: '#10b981' }] : []),
               ].map((item, i) => (
-                <div key={i} style={{
-                  background: 'var(--surface)',
-                  border: '1px solid var(--border)',
-                  borderRadius: 'var(--radius-md)',
-                  padding: '14px 16px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: 6
-                }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: item.color }}>
+                <div key={i} className={styles.specCard}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 5, color: item.color }}>
                     {item.icon}
-                    <span style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-secondary)' }}>{item.label}</span>
+                    <span className={styles.specLabel}>{item.label}</span>
                   </div>
-                  <div style={{ fontWeight: 800, fontSize: '1rem', color: 'var(--text-primary)' }}>{item.value}</div>
+                  <div className={styles.specValue}>{item.value}</div>
                 </div>
               ))}
             </div>
@@ -248,18 +293,14 @@ export default async function PropertyDetailsPage({ params }) {
           )}
 
           {/* ⚠️ Mediator notice */}
-          <div style={{
-            display: 'flex', gap: 12, alignItems: 'flex-start',
-            padding: '16px 20px',
+          <div className={styles.noticeBox} style={{
             background: 'rgba(217,119,6,0.06)',
             border: '1px solid rgba(217,119,6,0.2)',
             borderRight: '4px solid var(--secondary)',
-            borderRadius: 'var(--radius-md)',
             color: 'var(--secondary-hover)',
-            marginBottom: 20
           }}>
-            <AlertTriangle size={20} style={{ flexShrink: 0, marginTop: 2 }} />
-            <div style={{ fontSize: '0.9rem', lineHeight: 1.7 }}>
+            <AlertTriangle size={18} style={{ flexShrink: 0, marginTop: 2 }} />
+            <div className={styles.noticeBoxText}>
               <strong>تنبيه مهم: </strong>
               لا يتم الكشف عن رقم المالك أو العنوان التفصيلي للشقة علناً.
               كل التواصل والترتيب يتم حصرياً عن طريق فريق <strong>سكني</strong> لضمان حقك وحق المالك وتأمين عملية التعاقد.

@@ -1,10 +1,18 @@
+/* ─── CONTAINER ─────────────────────────────────────────────────────────────── */
 .container {
-  padding: 40px 20px;
+  padding: 32px 20px;
   max-width: 1200px;
   margin: 0 auto;
+  overflow-x: hidden;
 }
 
-/* Show widget inline on mobile, hidden in sidebar */
+@media (max-width: 600px) {
+  .container {
+    padding: 16px 14px;
+  }
+}
+
+/* ─── MOBILE / DESKTOP WIDGET TOGGLE ───────────────────────────────────────── */
 .mobileWidget {
   display: none;
 }
@@ -22,15 +30,15 @@
   }
 }
 
-
+/* ─── BACK BUTTON ───────────────────────────────────────────────────────────── */
 .backBtn {
   display: inline-flex;
   align-items: center;
   gap: 8px;
   color: var(--text-secondary);
   font-weight: 700;
-  margin-bottom: 24px;
-  font-size: 0.95rem;
+  margin-bottom: 20px;
+  font-size: 0.92rem;
   transition: var(--transition);
 }
 
@@ -39,7 +47,14 @@
   transform: translateX(5px);
 }
 
-/* Two-column layout */
+@media (max-width: 600px) {
+  .backBtn {
+    font-size: 0.85rem;
+    margin-bottom: 14px;
+  }
+}
+
+/* ─── TWO-COLUMN LAYOUT ─────────────────────────────────────────────────────── */
 .layout {
   display: grid;
   grid-template-columns: 2fr 1fr;
@@ -49,25 +64,35 @@
 @media (max-width: 900px) {
   .layout {
     grid-template-columns: 1fr;
-    gap: 30px;
+    gap: 0;
   }
 }
 
+/* ─── MAIN CONTENT COLUMN ───────────────────────────────────────────────────── */
 .mainContent {
   display: flex;
   flex-direction: column;
-  gap: 30px;
+  gap: 0;
+  min-width: 0; /* prevent overflow in grid */
 }
 
-/* Image Gallery */
+/* ─── IMAGE GALLERY ─────────────────────────────────────────────────────────── */
 .gallery {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+@media (max-width: 600px) {
+  .gallery {
+    margin-bottom: 16px;
+    gap: 8px;
+  }
 }
 
 .mainImageWrapper {
-  height: 450px;
+  height: 420px;
   position: relative;
   border-radius: var(--radius-lg);
   overflow: hidden;
@@ -76,10 +101,17 @@
   background-color: #e2e8f0;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
   .mainImageWrapper {
-    height: 280px;
+    height: 260px;
     border-radius: var(--radius-md);
+  }
+}
+
+@media (max-width: 480px) {
+  .mainImageWrapper {
+    height: 220px;
+    border-radius: 12px;
   }
 }
 
@@ -91,21 +123,45 @@
 
 .thumbnails {
   display: flex;
-  gap: 12px;
+  gap: 8px;
   overflow-x: auto;
-  padding-bottom: 8px;
+  padding-bottom: 6px;
+  scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
+}
+
+.thumbnails::-webkit-scrollbar {
+  height: 4px;
+}
+
+.thumbnails::-webkit-scrollbar-track {
+  background: var(--border);
+  border-radius: 2px;
+}
+
+.thumbnails::-webkit-scrollbar-thumb {
+  background: var(--primary);
+  border-radius: 2px;
 }
 
 .thumbnail {
-  width: 100px;
-  height: 75px;
-  border-radius: var(--radius-sm);
+  width: 90px;
+  height: 68px;
+  border-radius: 8px;
   overflow: hidden;
   cursor: pointer;
   border: 2px solid transparent;
   transition: var(--transition);
   flex-shrink: 0;
-  opacity: 0.7;
+  opacity: 0.65;
+}
+
+@media (max-width: 480px) {
+  .thumbnail {
+    width: 70px;
+    height: 52px;
+    border-radius: 6px;
+  }
 }
 
 .thumbnail:hover {
@@ -115,6 +171,7 @@
 .thumbnailActive {
   border-color: var(--primary);
   opacity: 1;
+  box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.25);
 }
 
 .thumbnailImage {
@@ -123,118 +180,349 @@
   object-fit: cover;
 }
 
-/* Details Section */
+/* ─── HEADER SECTION (badges + title + price) ───────────────────────────────── */
 .headerSection {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  border-bottom: 1px solid var(--border);
-  padding-bottom: 24px;
-}
-
-.badges {
-  display: flex;
   gap: 10px;
-  flex-wrap: wrap;
-}
-
-.title {
-  font-size: 2.2rem;
-  font-weight: 800;
-  color: var(--text-primary);
-  line-height: 1.4;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 20px;
+  margin-bottom: 20px;
+  min-width: 0;
 }
 
 @media (max-width: 600px) {
+  .headerSection {
+    gap: 8px;
+    padding-bottom: 16px;
+    margin-bottom: 16px;
+  }
+}
+
+/* ─── BADGES ────────────────────────────────────────────────────────────────── */
+.badges {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+@media (max-width: 480px) {
+  .badges {
+    gap: 5px;
+  }
+
+  /* Scale badges down on mobile */
+  .badges :global(.badge) {
+    font-size: 0.72rem !important;
+    padding: 4px 8px !important;
+    gap: 3px !important;
+  }
+}
+
+/* ─── TITLE ─────────────────────────────────────────────────────────────────── */
+.title {
+  font-size: 1.9rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1.4;
+  min-width: 0;
+  word-break: break-word;
+}
+
+@media (max-width: 768px) {
   .title {
     font-size: 1.5rem;
   }
 }
 
+@media (max-width: 480px) {
+  .title {
+    font-size: 1.25rem;
+    line-height: 1.5;
+  }
+}
+
+/* ─── PRICE ─────────────────────────────────────────────────────────────────── */
 .price {
-  font-size: 1.8rem;
+  font-size: 1.7rem;
   font-weight: 800;
   color: var(--primary);
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 480px) {
+  .price {
+    font-size: 1.4rem;
+  }
 }
 
 .priceUnit {
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 400;
   color: var(--text-secondary);
 }
 
+@media (max-width: 480px) {
+  .priceUnit {
+    font-size: 0.82rem;
+  }
+}
+
+/* ─── FEE BOX ────────────────────────────────────────────────────────────────── */
+.feeBox {
+  margin-top: 10px;
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.06), rgba(124, 58, 237, 0.06));
+  border: 1px solid rgba(37, 99, 235, 0.18);
+  border-right: 4px solid #2563eb;
+  border-radius: var(--radius-md);
+  padding: 13px 14px;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.feeBoxText {
+  font-size: 0.88rem;
+  color: #1e40af;
+  line-height: 1.7;
+  min-width: 0;
+  word-break: break-word;
+}
+
+.feeBoxTitle {
+  font-weight: 800;
+  font-size: 0.9rem;
+  color: #1e40af;
+  margin-bottom: 4px;
+}
+
+@media (max-width: 480px) {
+  .feeBox {
+    padding: 10px 12px;
+    gap: 8px;
+  }
+
+  .feeBoxTitle {
+    font-size: 0.82rem;
+  }
+
+  .feeBoxText {
+    font-size: 0.80rem;
+    line-height: 1.6;
+  }
+}
+
+/* ─── SPECS GRID ─────────────────────────────────────────────────────────────── */
+.specsSection {
+  margin-top: 20px;
+  margin-bottom: 16px;
+}
+
+.specsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 10px;
+  margin-top: 14px;
+}
+
+@media (max-width: 600px) {
+  .specsGrid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+}
+
+@media (max-width: 380px) {
+  .specsGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+}
+
+.specCard {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+  transition: box-shadow 0.2s ease;
+}
+
+.specCard:hover {
+  box-shadow: var(--shadow-sm);
+}
+
+@media (max-width: 600px) {
+  .specCard {
+    padding: 10px 10px;
+    border-radius: 10px;
+  }
+}
+
+.specLabel {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 480px) {
+  .specLabel {
+    font-size: 0.68rem;
+  }
+}
+
+.specValue {
+  font-weight: 800;
+  font-size: 0.95rem;
+  color: var(--text-primary);
+}
+
+@media (max-width: 480px) {
+  .specValue {
+    font-size: 0.85rem;
+  }
+}
+
+/* ─── WARNING / NOTICE BOXES ────────────────────────────────────────────────── */
+.noticeBox {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 14px 16px;
+  border-radius: var(--radius-md);
+  margin-bottom: 16px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.noticeBoxText {
+  font-size: 0.88rem;
+  line-height: 1.7;
+  min-width: 0;
+  word-break: break-word;
+}
+
+@media (max-width: 480px) {
+  .noticeBox {
+    padding: 11px 12px;
+    gap: 8px;
+  }
+
+  .noticeBoxText {
+    font-size: 0.80rem;
+    line-height: 1.6;
+  }
+}
+
+/* ─── META INFO ──────────────────────────────────────────────────────────────── */
 .metaInfo {
   display: flex;
   flex-wrap: wrap;
-  gap: 24px;
-  font-size: 0.9rem;
+  gap: 16px;
+  font-size: 0.88rem;
   color: var(--text-secondary);
   background-color: var(--surface);
   border: 1px solid var(--border);
-  padding: 16px 24px;
+  padding: 14px 18px;
   border-radius: var(--radius-md);
+}
+
+@media (max-width: 480px) {
+  .metaInfo {
+    gap: 10px;
+    padding: 12px 14px;
+    font-size: 0.82rem;
+  }
 }
 
 .metaItem {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 .metaIcon {
   color: var(--primary);
 }
 
+/* ─── DESCRIPTION ────────────────────────────────────────────────────────────── */
 .descriptionWrapper {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
+  margin-bottom: 16px;
 }
 
 .sectionTitle {
-  font-size: 1.3rem;
+  font-size: 1.2rem;
   font-weight: 800;
   color: var(--text-primary);
 }
 
-.description {
-  font-size: 1.05rem;
-  line-height: 1.8;
-  color: var(--text-secondary);
-  white-space: pre-line;
+@media (max-width: 480px) {
+  .sectionTitle {
+    font-size: 1.05rem;
+  }
 }
 
-/* Sidebar Contact Panel */
+.description {
+  font-size: 0.98rem;
+  line-height: 1.85;
+  color: var(--text-secondary);
+  white-space: pre-line;
+  word-break: break-word;
+}
+
+@media (max-width: 480px) {
+  .description {
+    font-size: 0.9rem;
+    line-height: 1.75;
+  }
+}
+
+/* ─── SIDEBAR ────────────────────────────────────────────────────────────────── */
 .sidebar {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 20px;
 }
 
 .contactCard {
   background-color: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  padding: 30px;
+  padding: 28px 24px;
   box-shadow: var(--shadow-lg);
   position: sticky;
   top: 100px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 18px;
 }
 
 .landlordInfo {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 14px;
   border-bottom: 1px solid var(--border);
-  padding-bottom: 16px;
+  padding-bottom: 14px;
 }
 
 .avatar {
-  width: 54px;
-  height: 54px;
+  width: 50px;
+  height: 50px;
   background-color: var(--primary-light);
   color: var(--primary);
   border-radius: 50%;
@@ -242,39 +530,41 @@
   align-items: center;
   justify-content: center;
   font-weight: 800;
-  font-size: 1.2rem;
+  font-size: 1.15rem;
+  flex-shrink: 0;
 }
 
 .avatarDetails {
   display: flex;
   flex-direction: column;
   gap: 4px;
+  min-width: 0;
 }
 
 .landlordName {
   font-weight: 700;
-  font-size: 1.1rem;
+  font-size: 1.05rem;
 }
 
 .landlordRole {
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   color: var(--text-muted);
 }
 
 .warningBox {
   background-color: rgba(239, 68, 68, 0.05);
   border: 1px dashed rgba(239, 68, 68, 0.3);
-  padding: 16px;
+  padding: 14px;
   border-radius: var(--radius-md);
   color: var(--danger);
-  font-size: 0.85rem;
-  line-height: 1.6;
+  font-size: 0.83rem;
+  line-height: 1.65;
 }
 
 .actions {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
 }
 
 .whatsappBtn {
@@ -303,20 +593,28 @@
   box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
 }
 
-/* Image Toolbar */
+/* ─── IMAGE TOOLBAR ─────────────────────────────────────────────────────────── */
 .imageToolbar {
   position: absolute;
-  top: 16px;
-  right: 16px;
+  top: 12px;
+  right: 12px;
   display: flex;
-  gap: 8px;
+  gap: 6px;
   z-index: 10;
   direction: rtl;
 }
 
+@media (max-width: 480px) {
+  .imageToolbar {
+    top: 8px;
+    right: 8px;
+    gap: 5px;
+  }
+}
+
 .toolbarBtn {
-  width: 40px;
-  height: 40px;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
   background: rgba(15, 23, 42, 0.6);
   backdrop-filter: blur(8px);
@@ -330,6 +628,13 @@
   box-shadow: var(--shadow-sm);
 }
 
+@media (max-width: 480px) {
+  .toolbarBtn {
+    width: 34px;
+    height: 34px;
+  }
+}
+
 .toolbarBtn:hover {
   background: var(--primary);
   border-color: var(--primary);
@@ -337,7 +642,7 @@
   transform: scale(1.1);
 }
 
-/* Lightbox */
+/* ─── LIGHTBOX ──────────────────────────────────────────────────────────────── */
 .lightbox {
   position: fixed;
   top: 0;
@@ -362,7 +667,7 @@
 
 .lightboxContent {
   position: relative;
-  width: 90%;
+  width: 92%;
   max-width: 900px;
   display: flex;
   flex-direction: column;
@@ -449,17 +754,17 @@
 }
 
 .lightboxCaption {
-  margin-top: 16px;
+  margin-top: 14px;
   color: #94a3b8;
   font-weight: 700;
-  font-size: 1rem;
+  font-size: 0.95rem;
   text-align: center;
   background: rgba(0, 0, 0, 0.4);
-  padding: 6px 16px;
+  padding: 5px 14px;
   border-radius: 20px;
 }
 
-/* Modals / Download Dialog */
+/* ─── MODALS ─────────────────────────────────────────────────────────────────── */
 .modalOverlay {
   position: fixed;
   top: 0;
@@ -474,6 +779,7 @@
   justify-content: center;
   animation: fadeIn 0.2s forwards;
   direction: rtl;
+  padding: 16px;
 }
 
 .modalContent {
@@ -481,7 +787,7 @@
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   padding: 24px;
-  width: 90%;
+  width: 100%;
   max-width: 400px;
   box-shadow: var(--shadow-2xl);
   text-align: center;
@@ -494,17 +800,17 @@
 }
 
 .modalTitle {
-  font-size: 1.25rem;
+  font-size: 1.2rem;
   font-weight: 800;
   color: var(--text-primary);
   margin-bottom: 8px;
 }
 
 .modalDesc {
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   color: var(--text-secondary);
-  margin-bottom: 20px;
-  line-height: 1.6;
+  margin-bottom: 18px;
+  line-height: 1.65;
 }
 
 .modalActions {
@@ -552,7 +858,7 @@
   padding: 8px;
   font-weight: 700;
   cursor: pointer;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   transition: all 0.2s;
 }
 
@@ -560,20 +866,20 @@
   color: var(--danger);
 }
 
-/* Toast */
+/* ─── TOAST ──────────────────────────────────────────────────────────────────── */
 .toast {
   position: fixed;
   bottom: 24px;
   left: 50%;
   transform: translateX(-50%);
-  background: rgba(15, 23, 42, 0.9);
+  background: rgba(15, 23, 42, 0.92);
   backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.1);
   color: #fff;
-  padding: 12px 24px;
+  padding: 11px 22px;
   border-radius: var(--radius-lg);
   font-weight: 700;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   z-index: 10000;
   box-shadow: var(--shadow-lg);
   display: flex;
@@ -581,10 +887,11 @@
   gap: 8px;
   direction: rtl;
   animation: slideUp 0.3s forwards;
+  max-width: calc(100vw - 32px);
+  text-align: center;
 }
 
 @keyframes slideUp {
   from { transform: translate(-50%, 50px); opacity: 0; }
   to { transform: translate(-50%, 0); opacity: 1; }
 }
-

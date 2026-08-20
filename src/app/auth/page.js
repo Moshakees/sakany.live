@@ -152,11 +152,24 @@ export default function AuthPage() {
         if (activeTab === 'login') {
           // Mock successful login
           setSuccess('تم تسجيل الدخول بنجاح! جاري تحويلك...');
+          let role = 'landlord';
+          let name = 'مالك تجريبي';
+          if (formData.identifier.includes('student')) {
+            role = 'student';
+            name = 'طالب تجريبي';
+          } else if (formData.identifier.includes('admin')) {
+            role = 'admin';
+            name = 'أدمن تجريبي';
+          } else if (formData.identifier.includes('broker')) {
+            role = 'broker';
+            name = 'سمسار تجريبي';
+          }
+
           const mockUser = {
             id: 'mock-user-123',
-            name: formData.identifier.includes('student') ? 'طالب تجريبي' : 'مالك تجريبي',
+            name: name,
             phone: '01012345678',
-            role: formData.identifier.includes('student') ? 'student' : 'landlord',
+            role: role,
             email: formData.identifier
           };
           localStorage.setItem('sakany_session', JSON.stringify(mockUser));
