@@ -38,23 +38,45 @@ export async function generateMetadata({ params }) {
   };
 }
 
-// Helper to extract direct streaming link from Google Drive or Dropbox if applicable
-function getEmbeddableVideoUrl(url) {
-  if (!url) return '';
-  
-  // Google Drive Link conversion
+// Helper: determines how to render a video URL
+// Returns an object: { type: 'iframe'|'video', src: string }
+function getVideoRenderInfo(url) {
+  if (!url) return { type: 'video', src: '' };
+
+  // YouTube
+  if (url.includes('youtube.com') || url.includes('youtu.be')) {
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+    const match = url.match(regExp);
+    const videoId = (match && match[2].length === 11) ? match[2] : null;
+    if (videoId) return { type: 'iframe', src: `https://www.youtube.com/embed/${videoId}` };
+  }
+
+  // Internet Archive — page URL (e.g. https://archive.org/details/identifier)
+  if (url.includes('archive.org/details/')) {
+    const identifier = url.split('archive.org/details/')[1]?.split('/')[0]?.split('?')[0];
+    if (identifier) return { type: 'iframe', src: `https://archive.org/embed/${identifier}` };
+  }
+
+  // Internet Archive — direct video URL (already a streamable link)
+  if (url.includes('archive.org/download/')) {
+    return { type: 'video', src: url };
+  }
+
+  // Google Drive — embed as iframe to bypass download restriction
   const driveRegex = /drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/;
   const driveMatch = url.match(driveRegex);
   if (driveMatch && driveMatch[1]) {
-    return `https://drive.google.com/uc?export=download&id=${driveMatch[1]}`;
+    return { type: 'iframe', src: `https://drive.google.com/file/d/${driveMatch[1]}/preview` };
   }
 
-  // Dropbox Link conversion
+  // Dropbox — convert to direct streaming URL
   if (url.includes('dropbox.com')) {
-    return url.replace('?dl=0', '?raw=1').replace('&dl=0', '&raw=1').replace('?dl=1', '?raw=1');
+    const directUrl = url.replace('?dl=0', '?raw=1').replace('&dl=0', '&raw=1').replace('?dl=1', '?raw=1');
+    return { type: 'video', src: directUrl };
   }
 
-  return url;
+  // Default: treat as direct video URL (Cloudinary, etc.)
+  return { type: 'video', src: url };
 }
 
 // ─── PAGE COMPONENT ──────────────────────────────────────────────────────────
@@ -160,41 +182,33 @@ export default async function PropertyDetailsPage({ params }) {
                 backgroundColor: '#000',
                 aspectRatio: '16/9'
               }}>
-                {property.video_url.includes('youtube.com') || property.video_url.includes('youtu.be') ? (
-                  // YouTube Video Embed
-                  (() => {
-                    let videoId = '';
-                    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-                    const match = property.video_url.match(regExp);
-                    if (match && match[2].length === 11) {
-                      videoId = match[2];
-                    }
-                    return videoId ? (
-                      <iframe
-                        src={`https://www.youtube.com/embed/${videoId}`}
-                        title="YouTube video player"
-                        frameBorder="0"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowFullScreen
-                        style={{ width: '100%', height: '100%', border: 'none' }}
-                      />
-                    ) : (
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#fff' }}>
-                        <a href={property.video_url} target="_blank" rel="noreferrer" style={{ color: 'var(--primary)' }}>
-                          اضغط هنا لفتح رابط الفيديو الخارجي
-                        </a>
-                      </div>
-                    );
-                  })()
-                ) : (
-                  // Direct Video URL (HTML5 player)
-                  <video
-                    src={getEmbeddableVideoUrl(property.video_url)}
-                    controls
-                    preload="metadata"
-                    style={{ width: '100%', height: '100%', objectFit: 'contain' }}
-                  />
-                )}
+                {(() => {
+                  const { type, src } = getVideoRenderInfo(property.video_url);
+                  if (!src) return (
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#aaa', fontSize: '0.9rem' }}>
+                      رابط الفيديو غير صالح
+                    </div>
+                  );
+                  if (type === 'iframe') return (
+                    <iframe
+                      src={src}
+                      title="فيديو معاينة السكن"
+                      frameBorder="0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                      style={{ width: '100%', height: '100%', border: 'none' }}
+                    />
+                  );
+                  // type === 'video'
+                  return (
+                    <video
+                      src={src}
+                      controls
+                      preload="metadata"
+                      style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                    />
+                  );
+                })()}
               </div>
             </div>
           )}

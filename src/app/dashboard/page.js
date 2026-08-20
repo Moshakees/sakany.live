@@ -3145,8 +3145,27 @@ export default function DashboardPage() {
                     </span>
                   </div>
                 ) : (
-                  <input type="url" placeholder="أدخل رابط الفيديو (مثل YouTube أو Cloudinary)"
-                    value={videoUrl} onChange={(e) => setVideoUrl(e.target.value)} className="form-input" />
+                  <div>
+                    <input type="url" placeholder="الصق رابط الفيديو هنا..."
+                      value={videoUrl} onChange={(e) => setVideoUrl(e.target.value)} className="form-input" />
+                    <div style={{
+                      marginTop: 8,
+                      padding: '10px 12px',
+                      background: 'rgba(5,150,105,0.05)',
+                      border: '1px solid rgba(5,150,105,0.15)',
+                      borderRadius: 'var(--radius-sm)',
+                      fontSize: '0.78rem',
+                      color: 'var(--text-secondary)',
+                      lineHeight: 1.7
+                    }}>
+                      ✅ <strong>المنصات المدعومة:</strong><br />
+                      • <strong>YouTube</strong>: الصق رابط الفيديو مباشرةً<br />
+                      • <strong>Internet Archive</strong> (archive.org): الصق رابط صفحة الفيديو مثل: <code style={{ fontSize: '0.75rem', opacity: 0.8 }}>https://archive.org/details/identifier</code><br />
+                      • <strong>Google Drive</strong>: اضغط مشاركة واختر "أي شخص لديه الرابط" ثم الصق الرابط<br />
+                      • <strong>Dropbox</strong>: انسخ الرابط المشترك وسيتم تحويله تلقائياً للتشغيل المباشر<br />
+                      • <strong>Cloudinary</strong> أو أي رابط MP4 مباشر
+                    </div>
+                  </div>
                 )}
 
                 {videoUrl && (
@@ -3154,7 +3173,14 @@ export default function DashboardPage() {
                     <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', display: 'block', marginBottom: 8, wordBreak: 'break-all' }}>
                       🎥 فيديو مضاف: <a href={videoUrl} target="_blank" rel="noreferrer" style={{ color: 'var(--primary)' }}>{videoUrl}</a>
                     </span>
-                    <video src={videoUrl} controls style={{ width: '100%', maxHeight: 200, borderRadius: 'var(--radius-sm)' }} />
+                    {/* Show video preview only for direct video links, else show a link */}
+                    {(videoUrl.includes('youtube.com') || videoUrl.includes('youtu.be') || videoUrl.includes('archive.org/details') || videoUrl.includes('drive.google.com')) ? (
+                      <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', padding: '8px 0' }}>
+                        ✅ سيتم عرض الفيديو في صفحة الشقة تلقائياً.
+                      </div>
+                    ) : (
+                      <video src={videoUrl} controls style={{ width: '100%', maxHeight: 200, borderRadius: 'var(--radius-sm)' }} />
+                    )}
                     <button type="button" onClick={() => setVideoUrl('')}
                       style={{ position: 'absolute', top: 6, left: 6, background: '#ef4444', color: '#fff', border: 'none', borderRadius: 'var(--radius-sm)', padding: '4px 8px', fontSize: '0.75rem', fontWeight: 'bold', cursor: 'pointer' }}>
                       إزالة الفيديو
