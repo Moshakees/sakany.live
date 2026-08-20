@@ -38,6 +38,25 @@ export async function generateMetadata({ params }) {
   };
 }
 
+// Helper to extract direct streaming link from Google Drive or Dropbox if applicable
+function getEmbeddableVideoUrl(url) {
+  if (!url) return '';
+  
+  // Google Drive Link conversion
+  const driveRegex = /drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/;
+  const driveMatch = url.match(driveRegex);
+  if (driveMatch && driveMatch[1]) {
+    return `https://drive.google.com/uc?export=download&id=${driveMatch[1]}`;
+  }
+
+  // Dropbox Link conversion
+  if (url.includes('dropbox.com')) {
+    return url.replace('?dl=0', '?raw=1').replace('&dl=0', '&raw=1').replace('?dl=1', '?raw=1');
+  }
+
+  return url;
+}
+
 // ─── PAGE COMPONENT ──────────────────────────────────────────────────────────
 export default async function PropertyDetailsPage({ params }) {
   const { id } = await params;
@@ -170,7 +189,7 @@ export default async function PropertyDetailsPage({ params }) {
                 ) : (
                   // Direct Video URL (HTML5 player)
                   <video
-                    src={property.video_url}
+                    src={getEmbeddableVideoUrl(property.video_url)}
                     controls
                     preload="metadata"
                     style={{ width: '100%', height: '100%', objectFit: 'contain' }}
