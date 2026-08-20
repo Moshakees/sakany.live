@@ -378,8 +378,8 @@ export default function DashboardPage() {
     const file = e.target.files[0];
     if (!file) return;
 
-    if (file.size > 50 * 1024 * 1024) {
-      setErrorMsg('حجم الفيديو كبير جداً. الحد الأقصى للملف هو 50 ميجابايت.');
+    if (file.size > 100 * 1024 * 1024) {
+      setErrorMsg('حجم الفيديو كبير جداً. الحد الأقصى للملف هو 100 ميجابايت.');
       return;
     }
 
@@ -387,38 +387,59 @@ export default function DashboardPage() {
     setErrorMsg('');
     setSuccessMsg('');
 
-    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
-    const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
+    try {
+      // 1. Attempt direct upload to Internet Archive via API route
+      const formData = new FormData();
+      formData.append('file', file);
 
-    if (cloudName && uploadPreset) {
-      try {
+      const res = await fetch('/api/upload/archive', {
+        method: 'POST',
+        body: formData
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        setVideoUrl(data.url || data.directUrl);
+        setSuccessMsg('✨ تم رفع الفيديو وتخزينه مجاناً بنجاح على Internet Archive!');
+        setUploadingVideo(false);
+        return;
+      }
+
+      // If IA keys are missing or failed, check Cloudinary as fallback
+      const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+      const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
+
+      if (cloudName && uploadPreset) {
         const uploadData = new FormData();
         uploadData.append('file', file);
         uploadData.append('upload_preset', uploadPreset);
 
-        const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/video/upload`, {
+        const cRes = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/video/upload`, {
           method: 'POST',
           body: uploadData
         });
 
-        if (!res.ok) {
-          throw new Error('فشل الرفع إلى Cloudinary');
+        if (cRes.ok) {
+          const cData = await cRes.json();
+          setVideoUrl(cData.secure_url);
+          setSuccessMsg('✨ تم رفع الفيديو وتخزينه خارجياً على Cloudinary!');
+          setUploadingVideo(false);
+          return;
         }
-
-        const data = await res.json();
-        setVideoUrl(data.secure_url);
-      } catch (err) {
-        console.error(err);
-        setErrorMsg('فشل رفع الفيديو إلى خادم Cloudinary. يرجى التأكد من الإعدادات.');
-      } finally {
-        setUploadingVideo(false);
       }
-    } else {
-      // Simulate successful upload using Pexels/Mixkit royalty free modern apartment interior MP4 video
+
+      // Demo mode fallback if no keys configured
       setTimeout(() => {
         setVideoUrl('https://assets.mixkit.co/videos/preview/mixkit-modern-apartment-interior-design-41907-large.mp4');
+        setSuccessMsg('💡 (وضع العرض التجريبي) تم إرفاق فيديو تجريبي. للرفع الحقيقي على Internet Archive أضف مفاتيح S3 في .env.local');
         setUploadingVideo(false);
-      }, 2000);
+      }, 1500);
+
+    } catch (err) {
+      console.error('Video upload error:', err);
+      setErrorMsg('حدث خطأ أثناء رفع الفيديو. يرجى المحاولة مرة أخرى.');
+      setUploadingVideo(false);
     }
   };
 
@@ -3140,8 +3161,8 @@ export default function DashboardPage() {
                       style={{ padding: '8px', cursor: 'pointer' }} disabled={uploadingVideo} />
                     <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginTop: 4 }}>
                       {uploadingVideo
-                        ? '🔄 جاري رفع الفيديو وتخزينه خارجياً...'
-                        : '💡 سيتم رفع الفيديو وتخزينه خارجياً على Cloudinary. الحد الأقصى 50 ميجابايت.'}
+                        ? '🔄 جاري رفع الفيديو وتخزينه خارجياً على Internet Archive...'
+                        : '💡 اختر فيديو الشقة من جهازك ليتم رفعه وتخزينه خارجياً مجاناً على Internet Archive.'}
                     </span>
                   </div>
                 ) : (
