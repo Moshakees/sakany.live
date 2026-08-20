@@ -49,12 +49,11 @@ export async function POST(request) {
       return NextResponse.json({ error: 'فشل الرفع إلى Internet Archive. تحقق من صحة المفاتيح.' }, { status: 500 });
     }
 
-    const detailUrl = `https://archive.org/details/${identifier}`;
     const directUrl = `https://archive.org/download/${identifier}/${cleanFileName}`;
 
     return NextResponse.json({
       success: true,
-      url: detailUrl,
+      url: directUrl,
       directUrl: directUrl,
       identifier: identifier
     });

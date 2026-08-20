@@ -472,8 +472,8 @@ export default function DashboardPage() {
 
         xhr.onload = () => {
           if (xhr.status >= 200 && xhr.status < 300) {
-            const detailUrl = `https://archive.org/details/${identifier}`;
-            setVideoUrl(detailUrl);
+            const directUrl = `https://archive.org/download/${identifier}/${cleanFileName}`;
+            setVideoUrl(directUrl);
             setSuccessMsg('✨ تم رفع الفيديو وتخزينه بنجاح على Internet Archive!');
             setUploadingVideo(false);
           } else {
