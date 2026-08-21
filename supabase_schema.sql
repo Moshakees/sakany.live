@@ -79,6 +79,14 @@ create policy "Admins can update any property" on public.properties
 create policy "Landlords/Brokers can delete their own properties" on public.properties
   for delete using (auth.uid() = landlord_id);
 
+create policy "Admins can delete any property" on public.properties
+  for delete using (
+    exists (
+      select 1 from public.profiles
+      where id = auth.uid() and role = 'admin'
+    )
+  );
+
 -- Migration helper: run this if adding review_status to existing table
 -- ALTER TABLE public.properties ADD COLUMN IF NOT EXISTS review_status text check (review_status in ('pending_review', 'approved', 'rejected')) default 'pending_review';
 -- ALTER TABLE public.properties ADD COLUMN IF NOT EXISTS rejection_reason text;

@@ -599,13 +599,17 @@ export async function deleteProperty(propertyId) {
   }
 
   try {
+    // Delete dependent records first to avoid foreign key violations
+    await supabase.from('booking_requests').delete().eq('property_id', propertyId);
+    await supabase.from('featured_requests').delete().eq('property_id', propertyId);
+    await supabase.from('reports').delete().eq('property_id', propertyId);
+
     const { data, error } = await supabase
       .from('properties')
       .delete()
-      .eq('id', propertyId)
-      .select()
-      .single();
-    return { data, error };
+      .eq('id', propertyId);
+
+    return { data: data || true, error };
   } catch (error) {
     return { data: null, error };
   }
