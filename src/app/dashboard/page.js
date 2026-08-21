@@ -1094,6 +1094,11 @@ export default function DashboardPage() {
             <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
               <MapPin size={12} /><span>{property.location}</span>
             </div>
+            {property.address && (
+              <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: 2 }}>
+                📍 العنوان التفصيلي: {property.address}
+              </div>
+            )}
             {/* Review status badge */}
             <span style={{
               padding: '3px 10px', borderRadius: 20, fontSize: '0.78rem', fontWeight: 700,
@@ -1242,6 +1247,25 @@ export default function DashboardPage() {
             <span>{property.rooms} غرف · دور {property.floor}</span>
             <span style={{ color: 'var(--text-muted)' }}>{formatDate(property.created_at)}</span>
           </div>
+
+          {/* Detailed Address for Admin */}
+          {property.address && (
+            <div style={{
+              marginTop: 6,
+              padding: '5px 10px',
+              background: 'rgba(124,58,237,0.08)',
+              border: '1px solid rgba(124,58,237,0.2)',
+              borderRadius: 'var(--radius-sm)',
+              fontSize: '0.8rem',
+              color: 'var(--text-primary)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6
+            }}>
+              <MapPin size={13} style={{ color: '#7c3aed', flexShrink: 0 }} />
+              <span><strong>📍 العنوان التفصيلي (خاص بالإدارة):</strong> {property.address}</span>
+            </div>
+          )}
           
           {/* Commission Info */}
           <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
@@ -1760,6 +1784,11 @@ export default function DashboardPage() {
                             {booking.property?.price?.toLocaleString('ar-EG')} ج.م {booking.requested_beds ? '/ للسرير' : ''}
                           </span>
                         </div>
+                        {isAdmin && booking.property?.address && (
+                          <div style={{ fontSize: '0.78rem', color: '#7c3aed', marginTop: 4, fontWeight: 600 }}>
+                            📍 العنوان التفصيلي: {booking.property.address}
+                          </div>
+                        )}
                       </Link>
 
                       {/* Landlord Details (Only visible to admin) */}

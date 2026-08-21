@@ -125,7 +125,7 @@ export const mockBookingRequests = [
   {
     id: 'booking-1',
     property_id: 'mock-1',
-    property: { id: 'mock-1', title: 'شقة فاخرة للطلاب بجوار بوابة الجلاء مباشرة', location: 'بوابة الجلاء', price: 3200, rent_type: 'apartment',
+    property: { id: 'mock-1', title: 'شقة فاخرة للطلاب بجوار بوابة الجلاء مباشرة', location: 'بوابة الجلاء', address: 'شارع الجلاء الرئيسي، أمام مكتبة حسني، المنصورة', price: 3200, rent_type: 'apartment',
       landlord: { full_name: 'أ. محمد المنشاوي', phone: '01009876543' }
     },
     landlord: { full_name: 'أ. محمد المنشاوي', phone: '01009876543' },
@@ -137,7 +137,7 @@ export const mockBookingRequests = [
   {
     id: 'booking-2',
     property_id: 'mock-2',
-    property: { id: 'mock-2', title: 'سرير في غرفة ثنائية - سكن طالبات راقي حي الجامعة', location: 'حي الجامعة', price: 1200, rent_type: 'bed',
+    property: { id: 'mock-2', title: 'سرير في غرفة ثنائية - سكن طالبات راقي حي الجامعة', location: 'حي الجامعة', address: 'تقاطع شارع جيهان مع حي الجامعة، المنصورة', price: 1200, rent_type: 'bed',
       landlord: { full_name: 'الحاجة أم أحمد', phone: '01223456789' }
     },
     landlord: { full_name: 'الحاجة أم أحمد', phone: '01223456789' },
@@ -149,7 +149,7 @@ export const mockBookingRequests = [
   {
     id: 'booking-3',
     property_id: 'mock-4',
-    property: { id: 'mock-4', title: 'شقة طالبات واسعة وقريبة من بوابة توشكى', location: 'بوابة توشكى', price: 3800, rent_type: 'apartment',
+    property: { id: 'mock-4', title: 'شقة طالبات واسعة وقريبة من بوابة توشكى', location: 'بوابة توشكى', address: 'تقسيم الزعفران، خلف كلية الحقوق، المنصورة', price: 3800, rent_type: 'apartment',
       landlord: { full_name: 'مهندس سامح عبد الهادي', phone: '01114567890' }
     },
     landlord: { full_name: 'مهندس سامح عبد الهادي', phone: '01114567890' },
@@ -259,7 +259,7 @@ export async function getProperties(filters = {}) {
   try {
     let query = supabase
       .from('properties')
-      .select('id,landlord_id,title,description,price,location,rooms,bathrooms,beds,gender_type,images,is_verified,is_featured,status,review_status,rejection_reason,views_count,created_at,has_ac,has_internet,has_elevator,floor,rent_type,available_beds')
+      .select('id,landlord_id,title,description,price,location,address,rooms,bathrooms,beds,gender_type,images,is_verified,is_featured,status,review_status,rejection_reason,views_count,created_at,has_ac,has_internet,has_elevator,floor,rent_type,available_beds')
       .order('is_verified', { ascending: false })
       .order('created_at', { ascending: false });
 
@@ -303,6 +303,12 @@ export async function getProperties(filters = {}) {
       query = query.or(`title.ilike.%${filters.search}%,description.ilike.%${filters.search}%`);
 
     const { data, error } = await query;
+
+    // Strip private address field only if query is from public student/guest
+    if (!filters.isAdmin && !filters.landlord_id && data) {
+      return { data: data.map(stripPrivate), error };
+    }
+
     return { data, error };
   } catch (error) {
     return { data: null, error };
