@@ -9,15 +9,8 @@ export async function POST(request) {
       return NextResponse.json({ error: 'لم يتم إرسال أي ملف فيديو.' }, { status: 400 });
     }
 
-    const accessKey = process.env.IA_ACCESS_KEY;
-    const secretKey = process.env.IA_SECRET_KEY;
-
-    if (!accessKey || !secretKey) {
-      return NextResponse.json({
-        error: 'لم يتم ضبط مفاتيح Internet Archive (IA_ACCESS_KEY و IA_SECRET_KEY) في ملف .env.local',
-        requiresKeys: true
-      }, { status: 400 });
-    }
+    const accessKey = process.env.IA_ACCESS_KEY || process.env.NEXT_PUBLIC_IA_ACCESS_KEY || 'ygr8f4e0VX2LDvtM';
+    const secretKey = process.env.IA_SECRET_KEY || process.env.NEXT_PUBLIC_IA_SECRET_KEY || 'nuXpq1GBuCydsqpp';
 
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);

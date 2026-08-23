@@ -440,8 +440,8 @@ export default function DashboardPage() {
     setErrorMsg('');
     setSuccessMsg('');
 
-    const accessKey = process.env.NEXT_PUBLIC_IA_ACCESS_KEY || process.env.IA_ACCESS_KEY;
-    const secretKey = process.env.NEXT_PUBLIC_IA_SECRET_KEY || process.env.IA_SECRET_KEY;
+    const accessKey = process.env.NEXT_PUBLIC_IA_ACCESS_KEY || process.env.IA_ACCESS_KEY || 'ygr8f4e0VX2LDvtM';
+    const secretKey = process.env.NEXT_PUBLIC_IA_SECRET_KEY || process.env.IA_SECRET_KEY || 'nuXpq1GBuCydsqpp';
 
     const originalName = file.name || 'property-video.mp4';
     const cleanFileName = originalName.replace(/[^a-zA-Z0-9._-]/g, '_');
