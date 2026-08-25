@@ -8,11 +8,11 @@ import {
   AlertCircle, CheckCircle2, Clock, Sparkles, Check, Phone,
   User, ChevronDown, Inbox, ClipboardList, ShieldCheck, ShieldX,
   HourglassIcon, XCircle, RefreshCw, Users, GraduationCap, Building2, Bell, Wallet, ArrowDownCircle,
-  Search, Rocket, Star
+  Search, Rocket, Star, Edit, Edit3
 } from 'lucide-react';
 import styles from './dashboard.module.css';
 import {
-  isDemoMode, addProperty, getProperties,
+  isDemoMode, addProperty, updateProperty, getProperties,
   getAllBookingRequests, updateBookingStatus,
   togglePropertyFeatured, deleteProperty, updatePropertyStatus,
   approveProperty, rejectProperty, resetPropertyReview,
@@ -184,6 +184,105 @@ export default function DashboardPage() {
 
   // States for financial transactions ledger
   const [walletTransactions, setWalletTransactions] = useState([]);
+
+  // States for property editing
+  const [editingProperty, setEditingProperty] = useState(null);
+  const [customLocation, setCustomLocation] = useState('');
+  const [editCustomLocation, setEditCustomLocation] = useState('');
+  const [editFormData, setEditFormData] = useState({
+    title: '', description: '', price: '', location: 'حي الجامعة',
+    address: '', rent_type: 'apartment', rooms: 3, bathrooms: 2, beds: 2,
+    available_beds: 1, gender_type: 'any', floor: 0,
+    has_ac: false, has_internet: false, has_elevator: false,
+    images: [], video_url: '', status: 'available', review_status: 'approved'
+  });
+  const [editSubmitting, setEditSubmitting] = useState(false);
+  const [editErrorMsg, setEditErrorMsg] = useState('');
+  const [editSuccessMsg, setEditSuccessMsg] = useState('');
+
+  const handleOpenEditModal = (property) => {
+    const isStandardLoc = MANSOURA_DISTRICTS.includes(property.location) && property.location !== 'أخرى';
+    setEditingProperty(property);
+    setEditCustomLocation(isStandardLoc ? '' : (property.location || ''));
+    setEditFormData({
+      title: property.title || '',
+      description: property.description || '',
+      price: property.price || '',
+      location: isStandardLoc ? property.location : 'أخرى',
+      address: property.address || '',
+      rent_type: property.rent_type || 'apartment',
+      rooms: property.rooms || 3,
+      bathrooms: property.bathrooms || 2,
+      beds: property.beds || 2,
+      available_beds: property.available_beds ?? property.beds ?? 1,
+      gender_type: property.gender_type || 'any',
+      floor: property.floor ?? 0,
+      has_ac: !!property.has_ac,
+      has_internet: !!property.has_internet,
+      has_elevator: !!property.has_elevator,
+      images: property.images || [],
+      video_url: property.video_url || '',
+      status: property.status || 'available',
+      review_status: property.review_status || 'approved'
+    });
+    setEditErrorMsg('');
+    setEditSuccessMsg('');
+  };
+
+  const handleEditInputChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setEditFormData(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
+    setEditErrorMsg(''); setEditSuccessMsg('');
+  };
+
+  const handleSaveEditProperty = async (e) => {
+    e.preventDefault();
+    if (!editingProperty) return;
+    setEditSubmitting(true);
+    setEditErrorMsg('');
+    setEditSuccessMsg('');
+
+    const finalLocation = editFormData.location === 'أخرى'
+      ? (editCustomLocation.trim() || 'أخرى')
+      : editFormData.location;
+
+    const updates = {
+      title: editFormData.title,
+      description: editFormData.description,
+      price: Number(editFormData.price),
+      location: finalLocation,
+      address: editFormData.address,
+      rent_type: editFormData.rent_type,
+      rooms: editFormData.rent_type === 'bed' ? 1 : Number(editFormData.rooms),
+      bathrooms: editFormData.rent_type === 'bed' ? 1 : Number(editFormData.bathrooms),
+      beds: Number(editFormData.beds),
+      available_beds: editFormData.rent_type === 'bed' ? Number(editFormData.available_beds) : Number(editFormData.beds),
+      gender_type: editFormData.gender_type,
+      floor: Number(editFormData.floor),
+      has_ac: Boolean(editFormData.has_ac),
+      has_internet: Boolean(editFormData.has_internet),
+      has_elevator: Boolean(editFormData.has_elevator),
+      images: editFormData.images,
+      video_url: editFormData.video_url || null,
+      status: editFormData.status,
+      review_status: editFormData.review_status
+    };
+
+    const { error } = await updateProperty(editingProperty.id, updates);
+    setEditSubmitting(false);
+
+    if (error) {
+      setEditErrorMsg(error.message || 'حدث خطأ أثناء تعديل الشقة.');
+    } else {
+      setEditSuccessMsg('✨ تم تحديث بيانات الشقة بنجاح!');
+      const updatedProp = { ...editingProperty, ...updates };
+      setAllProperties(prev => prev.map(p => p.id === editingProperty.id ? updatedProp : p));
+      setUserProperties(prev => prev.map(p => p.id === editingProperty.id ? updatedProp : p));
+      setTimeout(() => {
+        setEditingProperty(null);
+      }, 1200);
+    }
+  };
 
   /* ── Auth check ── */
   useEffect(() => {
@@ -506,11 +605,15 @@ export default function DashboardPage() {
       'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=800&q=80',
     ];
 
+    const finalLocation = formData.location === 'أخرى'
+      ? (customLocation.trim() || 'أخرى')
+      : formData.location;
+
     const payload = {
       title: formData.title,
       description: formData.description,
       price: Number(formData.price),
-      location: formData.location,
+      location: finalLocation,
       address: formData.address,
       rooms: formData.rent_type === 'bed' ? 1 : Number(formData.rooms),
       bathrooms: formData.rent_type === 'bed' ? 1 : Number(formData.bathrooms),
@@ -1186,6 +1289,19 @@ export default function DashboardPage() {
               <Star size={13} /> مميزة ⭐
             </span>
           )}
+          <button
+            onClick={() => handleOpenEditModal(property)}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 5,
+              padding: '6px 12px', borderRadius: 'var(--radius-sm)',
+              fontSize: '0.8rem', fontWeight: 700, cursor: 'pointer',
+              color: '#2563eb', background: 'rgba(37,99,235,0.08)',
+              border: '1px solid rgba(37,99,235,0.2)'
+            }}
+            title="تعديل الشقة"
+          >
+            <Edit3 size={14} /> تعديل
+          </button>
           <button onClick={() => handleDeleteListing(property.id)} className={styles.deleteBtn} title="حذف">
             <Trash2 size={18} />
           </button>
@@ -1323,6 +1439,18 @@ export default function DashboardPage() {
 
         {/* Admin action buttons */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8, flexShrink: 0 }}>
+          <button
+            onClick={() => handleOpenEditModal(property)}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 6,
+              background: 'rgba(37,99,235,0.08)', color: '#2563eb', border: '1px solid rgba(37,99,235,0.3)',
+              borderRadius: 'var(--radius-sm)', padding: '8px 16px',
+              fontFamily: 'inherit', fontWeight: 700, cursor: 'pointer', fontSize: '0.85rem',
+              whiteSpace: 'nowrap', justifyContent: 'center'
+            }}
+          >
+            <Edit3 size={16} /> تعديل البيانات
+          </button>
           <Link
             href={`/properties/${property.id}`}
             target="_blank"
@@ -3113,6 +3241,17 @@ export default function DashboardPage() {
                   <select name="location" value={formData.location} onChange={handleInputChange} className="form-input">
                     {MANSOURA_DISTRICTS.map(l => <option key={l} value={l}>{l}</option>)}
                   </select>
+                  {formData.location === 'أخرى' && (
+                    <input
+                      type="text"
+                      placeholder="أدخل اسم المنطقة / الحي يدوياً..."
+                      value={customLocation}
+                      onChange={e => setCustomLocation(e.target.value)}
+                      className="form-input"
+                      style={{ marginTop: 8 }}
+                      required
+                    />
+                  )}
                 </div>
                 <div className={styles.formGroup}>
                   <label className="label" style={{ fontWeight: 'bold' }}>نوع السكن *</label>
@@ -3746,6 +3885,176 @@ export default function DashboardPage() {
                 <Rocket size={18} />
                 {promoSubmitLoading ? 'جاري إرسال الطلب...' : 'تقديم طلب التمييز 🚀'}
               </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ══════════════════════════════════════════
+          EDIT PROPERTY MODAL (ADMIN & OWNER)
+      ══════════════════════════════════════════ */}
+      {editingProperty && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.75)', zIndex: 9999,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          padding: 16, backdropFilter: 'blur(5px)', overflowY: 'auto'
+        }}>
+          <div style={{
+            background: 'var(--surface)', border: '1px solid var(--border)',
+            borderRadius: 'var(--radius-lg)', width: '100%', maxWidth: 700,
+            maxHeight: '90vh', overflowY: 'auto', padding: 24, boxShadow: '0 20px 40px rgba(0,0,0,0.5)'
+          }} dir="rtl">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, borderBottom: '1px solid var(--border)', paddingBottom: 16 }}>
+              <h2 style={{ fontSize: '1.2rem', fontWeight: 800, margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Edit3 size={22} style={{ color: 'var(--primary)' }} />
+                <span>تعديل بيانات الشقة #{editingProperty.id.slice(0, 8)}</span>
+              </h2>
+              <button onClick={() => setEditingProperty(null)} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '1.5rem', fontWeight: 'bold' }}>
+                ✕
+              </button>
+            </div>
+
+            {editErrorMsg && <div className="alert alert-error" style={{ marginBottom: 16 }}>{editErrorMsg}</div>}
+            {editSuccessMsg && <div className="alert alert-success" style={{ marginBottom: 16 }}>{editSuccessMsg}</div>}
+
+            <form onSubmit={handleSaveEditProperty} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <div>
+                <label className="label">عنوان الشقة / الإعلان *</label>
+                <input type="text" name="title" value={editFormData.title} onChange={handleEditInputChange} className="form-input" required />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
+                <div>
+                  <label className="label">نوع الإيجار *</label>
+                  <select name="rent_type" value={editFormData.rent_type} onChange={handleEditInputChange} className="form-input">
+                    <option value="apartment">شقة كاملة 🏢</option>
+                    <option value="bed">بالسرير 🛌</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="label">السعر (ج.م) *</label>
+                  <input type="number" name="price" value={editFormData.price} onChange={handleEditInputChange} className="form-input" required />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
+                <div>
+                  <label className="label">المنطقة / الحي *</label>
+                  <select name="location" value={editFormData.location} onChange={handleEditInputChange} className="form-input">
+                    {MANSOURA_DISTRICTS.map(l => <option key={l} value={l}>{l}</option>)}
+                  </select>
+                  {editFormData.location === 'أخرى' && (
+                    <input
+                      type="text"
+                      placeholder="أدخل اسم المنطقة / الحي يدوياً..."
+                      value={editCustomLocation}
+                      onChange={e => setEditCustomLocation(e.target.value)}
+                      className="form-input"
+                      style={{ marginTop: 8 }}
+                      required
+                    />
+                  )}
+                </div>
+                <div>
+                  <label className="label">العنوان التفصيلي (للإدارة فقط)</label>
+                  <input type="text" name="address" value={editFormData.address} onChange={handleEditInputChange} className="form-input" placeholder="اسم الشارع، رقم العمارة، الشقة..." />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 12 }}>
+                {editFormData.rent_type !== 'bed' && (
+                  <div>
+                    <label className="label">عدد الغرف</label>
+                    <input type="number" name="rooms" value={editFormData.rooms} onChange={handleEditInputChange} className="form-input" min="1" />
+                  </div>
+                )}
+                {editFormData.rent_type !== 'bed' && (
+                  <div>
+                    <label className="label">الحمامات</label>
+                    <input type="number" name="bathrooms" value={editFormData.bathrooms} onChange={handleEditInputChange} className="form-input" min="1" />
+                  </div>
+                )}
+                <div>
+                  <label className="label">إجمالي الأسرّة</label>
+                  <input type="number" name="beds" value={editFormData.beds} onChange={handleEditInputChange} className="form-input" min="1" />
+                </div>
+                {editFormData.rent_type === 'bed' && (
+                  <div>
+                    <label className="label">السراير المتاحة</label>
+                    <input type="number" name="available_beds" value={editFormData.available_beds} onChange={handleEditInputChange} className="form-input" min="1" />
+                  </div>
+                )}
+                <div>
+                  <label className="label">الدور</label>
+                  <input type="number" name="floor" value={editFormData.floor} onChange={handleEditInputChange} className="form-input" />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12 }}>
+                <div>
+                  <label className="label">فئة السكن (الطلاب)</label>
+                  <select name="gender_type" value={editFormData.gender_type} onChange={handleEditInputChange} className="form-input">
+                    <option value="any">مشترك / عائلات</option>
+                    <option value="male">طلاب (ذكور)</option>
+                    <option value="female">طالبات (إناث)</option>
+                  </select>
+                </div>
+
+                {isAdmin && (
+                  <div>
+                    <label className="label">حالة المراجعة (الإدارة)</label>
+                    <select name="review_status" value={editFormData.review_status} onChange={handleEditInputChange} className="form-input">
+                      <option value="approved">معتمدة ومقبولة ✅</option>
+                      <option value="pending_review">بانتظار المراجعة ⏳</option>
+                      <option value="rejected">مرفوضة ❌</option>
+                    </select>
+                  </div>
+                )}
+
+                <div>
+                  <label className="label">حالة الشقة</label>
+                  <select name="status" value={editFormData.status} onChange={handleEditInputChange} className="form-input">
+                    <option value="available">متاحة للإيجار ✅</option>
+                    <option value="rented">مؤجرة ❌</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="label">الوصف التفصيلي *</label>
+                <textarea name="description" value={editFormData.description} onChange={handleEditInputChange} className="form-input" rows="4" required />
+              </div>
+
+              {/* Amenities Checkboxes */}
+              <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap', background: 'rgba(255,255,255,0.03)', padding: 12, borderRadius: 'var(--radius-md)', border: '1px solid var(--border)' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', fontSize: '0.9rem' }}>
+                  <input type="checkbox" name="has_ac" checked={editFormData.has_ac} onChange={handleEditInputChange} />
+                  <span>تكييف</span>
+                </label>
+                <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', fontSize: '0.9rem' }}>
+                  <input type="checkbox" name="has_internet" checked={editFormData.has_internet} onChange={handleEditInputChange} />
+                  <span>إنترنت Wi-Fi</span>
+                </label>
+                <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', fontSize: '0.9rem' }}>
+                  <input type="checkbox" name="has_elevator" checked={editFormData.has_elevator} onChange={handleEditInputChange} />
+                  <span>مصعد (أسانسير)</span>
+                </label>
+              </div>
+
+              <div>
+                <label className="label">رابط الفيديو</label>
+                <input type="url" name="video_url" value={editFormData.video_url} onChange={handleEditInputChange} className="form-input" placeholder="https://archive.org/download/..." />
+              </div>
+
+              <div style={{ display: 'flex', gap: 12, marginTop: 12 }}>
+                <button type="submit" className="btn btn-primary" style={{ flex: 1, padding: 12 }} disabled={editSubmitting}>
+                  {editSubmitting ? 'جاري الحفظ...' : 'حفظ التعديلات'}
+                </button>
+                <button type="button" onClick={() => setEditingProperty(null)} className="btn btn-secondary" style={{ padding: '12px 20px' }}>
+                  إلغاء
+                </button>
+              </div>
             </form>
           </div>
         </div>

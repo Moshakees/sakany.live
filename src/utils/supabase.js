@@ -635,6 +635,29 @@ export async function updatePropertyStatus(propertyId, status) {
   }
 }
 
+export async function updateProperty(propertyId, updates) {
+  if (isDemoMode) {
+    const idx = mockProperties.findIndex(p => p.id === propertyId);
+    if (idx !== -1) {
+      mockProperties[idx] = { ...mockProperties[idx], ...updates };
+      return { data: mockProperties[idx], error: null };
+    }
+    return { data: null, error: new Error('Property not found') };
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('properties')
+      .update(updates)
+      .eq('id', propertyId)
+      .select()
+      .single();
+    return { data, error };
+  } catch (error) {
+    return { data: null, error };
+  }
+}
+
 export async function togglePropertyFeatured(propertyId, isFeatured) {
   if (isDemoMode) {
     const prop = mockProperties.find(p => p.id === propertyId);
